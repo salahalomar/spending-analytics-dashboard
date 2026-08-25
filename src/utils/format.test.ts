@@ -20,9 +20,32 @@ describe('formatCurrency', () => {
 });
 
 describe('formatCompactCurrency', () => {
-  it('abbreviates large amounts', () => {
-    expect(normalise(formatCompactCurrency(120_000))).toBe('£1.2K');
-    expect(normalise(formatCompactCurrency(500_000_00))).toBe('£500K');
+  it.each([
+    [0, '£0'],
+    [50, '£1'],
+    [12_500, '£125'],
+    [99_999, '£1000'],
+    [100_000, '£1K'],
+    [120_000, '£1.2K'],
+    [1_250_000, '£13K'],
+    [950_000, '£9.5K'],
+    [12_000_000, '£120K'],
+    [50_000_000, '£500K'],
+    [100_000_000, '£1M'],
+    [123_456_789, '£1.2M'],
+    [100_000_000_000, '£1B'],
+  ])('formats %d minor units as %s', (minor, expected) => {
+    expect(formatCompactCurrency(minor)).toBe(expected);
+  });
+
+  it('keeps the sign on negative amounts', () => {
+    expect(formatCompactCurrency(-120_000)).toBe('-£1.2K');
+  });
+
+  // Intl's own compact notation swings between "£500" and "£0.5K" depending
+  // on the host's ICU version, which is why this is hand-rolled.
+  it('does not depend on the host ICU version', () => {
+    expect(formatCompactCurrency(50_000)).toBe('£500');
   });
 });
 

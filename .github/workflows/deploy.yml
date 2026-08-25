@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -34,12 +34,11 @@ jobs:
           DEPLOY_BASE: /${{ github.event.repository.name }}/
         run: npm run build
 
+      # Reads the repository's Pages configuration. Pages itself has to be
+      # switched on once under Settings → Pages → Source: GitHub Actions; the
+      # workflow token is not permitted to create the Pages site itself.
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          # Turns Pages on for the repo on the first run, so no manual step in
-          # Settings is needed.
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

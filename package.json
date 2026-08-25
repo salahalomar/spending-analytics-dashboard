@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Spending analytics dashboard rendering 50,000 transactions with virtualised scrolling, filtering and charts.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

@@ -101,7 +101,7 @@ Then open http://localhost:5173.
 
 ## Testing
 
-**189 Jest tests at ~97% statement coverage**, with the threshold enforced in
+**203 Jest tests at ~97% statement coverage**, with the threshold enforced in
 [`jest.config.cjs`](jest.config.cjs) so it cannot quietly rot.
 
 The suite is layered rather than uniform:
@@ -148,7 +148,8 @@ cypress/
 The repository is set up for three hosts, each needing no extra configuration:
 
 - **GitHub Pages** — [`deploy.yml`](.github/workflows/deploy.yml) builds and publishes on every
-  push to `main`. Enable it under *Settings → Pages → Source: GitHub Actions*.
+  push to `main`. Requires *Settings → Pages → Source: GitHub Actions* once; the workflow token
+  cannot create the Pages site itself.
 - **Vercel** — import the repository; [`vercel.json`](vercel.json) supplies the rest.
 - **Netlify** — import the repository; [`netlify.toml`](netlify.toml) supplies the rest.
 
