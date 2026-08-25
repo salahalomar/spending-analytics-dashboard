@@ -31,11 +31,12 @@ export function TransactionList() {
   const selectedId = useAppSelector((state) => state.ui.selectedTransactionId);
   const { sortField, sortDirection } = useAppSelector((state) => state.filters);
 
-  const { scrollRef, virtualItems, totalHeight, range, scrollToTop } = useVirtualizer<HTMLDivElement>({
-    itemCount: transactions.length,
-    itemHeight: ROW_HEIGHT,
-    overscan: OVERSCAN,
-  });
+  const { scrollRef, virtualItems, totalHeight, range, scrollToTop } =
+    useVirtualizer<HTMLDivElement>({
+      itemCount: transactions.length,
+      itemHeight: ROW_HEIGHT,
+      overscan: OVERSCAN,
+    });
 
   // Changing the filters or the sort produces a different list; leaving the
   // user 12,000 rows down in it would be disorienting.
@@ -82,7 +83,9 @@ export function TransactionList() {
                 data-testid={`sort-${option.field}`}
               >
                 {option.label}
-                {isActive ? <span aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span> : null}
+                {isActive ? (
+                  <span aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                ) : null}
                 {isActive ? (
                   <span className="sr-only">
                     , sorted {sortDirection === 'asc' ? 'ascending' : 'descending'}

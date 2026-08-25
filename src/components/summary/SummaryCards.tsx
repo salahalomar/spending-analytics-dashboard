@@ -67,7 +67,9 @@ export function SummaryCards() {
               />
               <span>
                 {formatCurrency(summary.topCategoryMinor)} ·{' '}
-                {formatPercent(summary.totalMinor === 0 ? 0 : summary.topCategoryMinor / summary.totalMinor)}
+                {formatPercent(
+                  summary.totalMinor === 0 ? 0 : summary.topCategoryMinor / summary.totalMinor,
+                )}
               </span>
             </>
           ) : (

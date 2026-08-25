@@ -25,7 +25,10 @@ if (typeof globalThis.PointerEvent === 'undefined') {
     readonly pointerId: number;
     readonly pointerType: string;
 
-    constructor(type: string, params: MouseEventInit & { pointerId?: number; pointerType?: string } = {}) {
+    constructor(
+      type: string,
+      params: MouseEventInit & { pointerId?: number; pointerType?: string } = {},
+    ) {
       super(type, params);
       this.pointerId = params.pointerId ?? 1;
       this.pointerType = params.pointerType ?? 'mouse';

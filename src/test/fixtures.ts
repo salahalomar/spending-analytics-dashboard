@@ -37,10 +37,41 @@ export function makeTransaction(overrides: TransactionOverrides = {}): Transacti
 /** A small, hand-checkable dataset used across the selector tests. */
 export function makeTransactionSet(): Transaction[] {
   return [
-    makeTransaction({ id: 'a', merchant: 'Tesco', category: 'Groceries', amountMinor: 5000, date: '2025-06-10T10:00:00.000Z' }),
-    makeTransaction({ id: 'b', merchant: 'Uber', category: 'Transport', amountMinor: 2500, date: '2025-06-05T10:00:00.000Z' }),
-    makeTransaction({ id: 'c', merchant: 'Netflix', category: 'Subscriptions', amountMinor: 1099, date: '2025-05-20T10:00:00.000Z' }),
-    makeTransaction({ id: 'd', merchant: 'Tesco', category: 'Groceries', amountMinor: 7500, date: '2025-05-02T10:00:00.000Z' }),
-    makeTransaction({ id: 'e', merchant: 'Amazon', category: 'Shopping', amountMinor: 12000, date: '2025-04-18T10:00:00.000Z', status: 'pending' }),
+    makeTransaction({
+      id: 'a',
+      merchant: 'Tesco',
+      category: 'Groceries',
+      amountMinor: 5000,
+      date: '2025-06-10T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'b',
+      merchant: 'Uber',
+      category: 'Transport',
+      amountMinor: 2500,
+      date: '2025-06-05T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'c',
+      merchant: 'Netflix',
+      category: 'Subscriptions',
+      amountMinor: 1099,
+      date: '2025-05-20T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'd',
+      merchant: 'Tesco',
+      category: 'Groceries',
+      amountMinor: 7500,
+      date: '2025-05-02T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'e',
+      merchant: 'Amazon',
+      category: 'Shopping',
+      amountMinor: 12000,
+      date: '2025-04-18T10:00:00.000Z',
+      status: 'pending',
+    }),
   ].sort((left, right) => right.timestamp - left.timestamp);
 }

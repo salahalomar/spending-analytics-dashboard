@@ -56,11 +56,7 @@ export function App() {
             <SummaryCards />
 
             <div className={styles.charts}>
-              <ChartCard
-                title="Spend over time"
-                caption="Monthly total"
-                testId="chart-monthly"
-              >
+              <ChartCard title="Spend over time" caption="Monthly total" testId="chart-monthly">
                 <MonthlyTrendChart />
               </ChartCard>
 

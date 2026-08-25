@@ -1,0 +1,49 @@
+.boundary {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  min-height: 100dvh;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.title {
+  font-size: 18px;
+}
+
+.message {
+  max-width: 460px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.detail {
+  max-width: 640px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: left;
+  color: var(--negative);
+}
+
+.retry {
+  margin-top: 6px;
+  padding: 8px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.retry:hover {
+  filter: brightness(1.08);
+}

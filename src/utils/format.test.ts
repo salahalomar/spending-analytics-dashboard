@@ -6,9 +6,10 @@ import {
   formatSignedPercent,
 } from './format';
 
-// Intl inserts a narrow no-break space in some groupings; normalise whitespace
+// Intl separates groups with a narrow no-break space (U+202F) or a no-break
+// space (U+00A0) depending on the locale data; normalise them to plain spaces
 // so the assertions describe the digits rather than the separator bytes.
-const normalise = (value: string) => value.replace(/ | /g, ' ');
+const normalise = (value: string) => value.replace(/[\u202F\u00A0]/g, ' ');
 
 describe('formatCurrency', () => {
   it('renders minor units as pounds with two decimals', () => {

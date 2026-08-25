@@ -3,6 +3,7 @@ import type { Transaction } from '@/types/transaction';
 import { categoryColorVar, statusColorVar } from '@/utils/categoryColor';
 import { formatDate, formatTime } from '@/utils/date';
 import { formatCurrency } from '@/utils/format';
+import { TRANSACTION_DETAIL_ID } from './TransactionDetail';
 import styles from './TransactionList.module.css';
 
 interface TransactionRowProps {
@@ -49,6 +50,7 @@ function TransactionRowComponent({
         className={`${styles.row} ${isSelected ? styles.rowSelected : ''}`}
         onClick={() => onSelect(transaction.id)}
         aria-expanded={isSelected}
+        aria-controls={TRANSACTION_DETAIL_ID}
         data-testid="transaction-row"
         data-transaction-id={transaction.id}
       >
@@ -82,7 +84,9 @@ function TransactionRowComponent({
           {transaction.status}
         </span>
 
-        <span className={`${styles.amountCell} numeric`}>{formatCurrency(transaction.amountMinor)}</span>
+        <span className={`${styles.amountCell} numeric`}>
+          {formatCurrency(transaction.amountMinor)}
+        </span>
       </button>
     </div>
   );

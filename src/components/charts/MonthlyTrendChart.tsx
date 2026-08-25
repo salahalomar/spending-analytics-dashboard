@@ -87,7 +87,7 @@ export function MonthlyTrendChart() {
           height={height}
           role="img"
           tabIndex={0}
-          aria-label={`Spend per month across ${data.length} months. Use the arrow keys to step through the series.`}
+          aria-label={`Spend per month across ${data.length} months. Use the arrow keys to step through the series; the same figures are available as a table.`}
           onPointerMove={handlePointerMove}
           onPointerLeave={() => setHoverIndex(null)}
           onBlur={() => setHoverIndex(null)}
@@ -146,6 +146,27 @@ export function MonthlyTrendChart() {
         </svg>
       ) : null}
 
+      {/* The SVG is decorative to assistive tech; these are the actual numbers. */}
+      <table className="sr-only">
+        <caption>Spend per month</caption>
+        <thead>
+          <tr>
+            <th scope="col">Month</th>
+            <th scope="col">Total spend</th>
+            <th scope="col">Transactions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((datum) => (
+            <tr key={datum.month}>
+              <th scope="row">{formatMonthLabel(datum.month)}</th>
+              <td>{formatCurrency(datum.totalMinor)}</td>
+              <td>{formatCount(datum.count)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {activeDatum && activePoint ? (
         <div
           className={styles.tooltip}
@@ -156,9 +177,7 @@ export function MonthlyTrendChart() {
           <span className={`${styles.tooltipValue} numeric`}>
             {formatCurrency(activeDatum.totalMinor)}
           </span>
-          <span className={styles.tooltipCount}>
-            {formatCount(activeDatum.count)} transactions
-          </span>
+          <span className={styles.tooltipCount}>{formatCount(activeDatum.count)} transactions</span>
         </div>
       ) : null}
     </div>

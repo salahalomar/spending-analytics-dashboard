@@ -23,12 +23,12 @@ export function useElementSize<T extends HTMLElement = HTMLDivElement>(): [
   const ref = useCallback((node: T | null) => setElement(node), []);
 
   useLayoutEffect(() => {
-    if (!element) {
-      setSize({ width: 0, height: 0 });
-      return;
-    }
+    if (!element) return;
 
     const measure = () => {
+      // Measuring is the legitimate case for setting state from a layout
+      // effect: the rendered size cannot be known any other way. The updater
+      // returns the current object when nothing changed, so this cannot loop.
       setSize((current) =>
         current.width === element.clientWidth && current.height === element.clientHeight
           ? current

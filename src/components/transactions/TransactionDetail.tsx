@@ -1,9 +1,13 @@
+import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { transactionDeselected } from '@/features/ui/uiSlice';
 import { selectVisibleTransactions } from '@/features/transactions/selectors';
 import { formatDate, formatTime } from '@/utils/date';
 import { formatCurrency } from '@/utils/format';
 import styles from './TransactionDetail.module.css';
+
+/** Referenced by each row's `aria-controls`. */
+export const TRANSACTION_DETAIL_ID = 'transaction-detail-panel';
 
 /**
  * Details for the selected row, docked below the list.
@@ -17,6 +21,16 @@ export function TransactionDetail() {
   const selectedId = useAppSelector((state) => state.ui.selectedTransactionId);
   const visible = useAppSelector(selectVisibleTransactions);
 
+  // Closing removes the button that had focus, which would drop the caret back
+  // to the top of the document. Hand it to the row the panel described.
+  const handleClose = useCallback(() => {
+    const row = selectedId
+      ? document.querySelector<HTMLElement>(`[data-transaction-id="${selectedId}"]`)
+      : null;
+    dispatch(transactionDeselected());
+    row?.focus();
+  }, [dispatch, selectedId]);
+
   if (selectedId === null) return null;
 
   const transaction = visible.find((candidate) => candidate.id === selectedId);
@@ -25,7 +39,7 @@ export function TransactionDetail() {
 
   return (
     <div className={styles.wrapper}>
-      <dl className={styles.panel} data-testid="transaction-detail">
+      <dl className={styles.panel} id={TRANSACTION_DETAIL_ID} data-testid="transaction-detail">
         <div className={styles.field}>
           <dt>Merchant</dt>
           <dd>{transaction.merchant}</dd>
@@ -60,11 +74,18 @@ export function TransactionDetail() {
       <button
         type="button"
         className={styles.close}
-        onClick={() => dispatch(transactionDeselected())}
+        onClick={handleClose}
         aria-label="Close transaction details"
         data-testid="close-detail"
       >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+        >
           <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
         </svg>
       </button>

@@ -43,7 +43,8 @@ export function formatCompactCurrency(amountMinor: number): string {
     if (magnitude >= threshold) {
       const scaled = magnitude / threshold;
       // One decimal below ten, none above: £1.2K, £12K, £120K.
-      const digits = scaled < 10 ? stripTrailingZero(scaled.toFixed(1)) : String(Math.round(scaled));
+      const digits =
+        scaled < 10 ? stripTrailingZero(scaled.toFixed(1)) : String(Math.round(scaled));
       return `${sign}£${digits}${suffix}`;
     }
   }

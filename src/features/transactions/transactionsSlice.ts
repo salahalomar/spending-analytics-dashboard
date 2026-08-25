@@ -1,5 +1,9 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { generateTransactions, DEFAULT_TRANSACTION_COUNT, DEFAULT_SEED } from '@/data/generateTransactions';
+import {
+  generateTransactions,
+  DEFAULT_TRANSACTION_COUNT,
+  DEFAULT_SEED,
+} from '@/data/generateTransactions';
 import type { Transaction } from '@/types/transaction';
 
 export type LoadStatus = 'idle' | 'loading' | 'succeeded' | 'failed';

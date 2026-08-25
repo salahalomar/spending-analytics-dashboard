@@ -56,7 +56,10 @@ export function buildLinePath(points: readonly { x: number; y: number }[]): stri
 }
 
 /** Closes a line path down to the baseline so it can be filled as an area. */
-export function buildAreaPath(points: readonly { x: number; y: number }[], baselineY: number): string {
+export function buildAreaPath(
+  points: readonly { x: number; y: number }[],
+  baselineY: number,
+): string {
   if (points.length === 0) return '';
   const first = points[0]!;
   const last = points[points.length - 1]!;

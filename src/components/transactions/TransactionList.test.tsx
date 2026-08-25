@@ -125,6 +125,33 @@ describe('TransactionList', () => {
     expect(within(detail).getByText('txn_0')).toBeInTheDocument();
   });
 
+  it('points each row at the panel it opens', async () => {
+    const user = userEvent.setup();
+    renderList(makeLargeDataset(50));
+
+    const row = screen.getAllByTestId('transaction-row')[0]!;
+    expect(row).toHaveAttribute('aria-expanded', 'false');
+    expect(row).toHaveAttribute('aria-controls');
+
+    await user.click(row);
+    expect(screen.getAllByTestId('transaction-row')[0]!).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('transaction-detail')).toHaveAttribute(
+      'id',
+      row.getAttribute('aria-controls'),
+    );
+  });
+
+  it('returns focus to the row when the detail panel is dismissed', async () => {
+    const user = userEvent.setup();
+    renderList(makeLargeDataset(50));
+
+    await user.click(screen.getAllByTestId('transaction-row')[0]!);
+    await user.click(screen.getByTestId('close-detail'));
+
+    // Without this the caret would drop back to the top of the document.
+    expect(screen.getAllByTestId('transaction-row')[0]!).toHaveFocus();
+  });
+
   it('closes the detail panel when the same row is clicked again', async () => {
     const user = userEvent.setup();
     renderList(makeLargeDataset(50));

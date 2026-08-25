@@ -43,7 +43,10 @@
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-size: 12px;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .sortButton:hover {
@@ -84,7 +87,10 @@
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
-  contain: strict;
+  /* Isolates the row layer's layout and paint from the rest of the page.
+     Deliberately `content` rather than `strict`: size containment would
+     detach the viewport's height from its flex parent. */
+  contain: content;
 }
 
 .canvas {

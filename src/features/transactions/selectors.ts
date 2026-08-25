@@ -89,10 +89,20 @@ const selectDateBounds = createSelector([selectDateFrom, selectDateTo], (from, t
  * merchant, category and amount predicates.
  */
 export const selectFilteredIgnoringDate = createSelector(
-  [selectAllTransactions, selectMatchingMerchants, selectCategorySet, selectStatusSet, selectAmountBounds],
+  [
+    selectAllTransactions,
+    selectMatchingMerchants,
+    selectCategorySet,
+    selectStatusSet,
+    selectAmountBounds,
+  ],
   (transactions, merchants, categories, statuses, { minMinor, maxMinor }) => {
     const noFiltersActive =
-      merchants === null && categories === null && statuses === null && minMinor === null && maxMinor === null;
+      merchants === null &&
+      categories === null &&
+      statuses === null &&
+      minMinor === null &&
+      maxMinor === null;
     if (noFiltersActive) return transactions;
 
     const result: Transaction[] = [];
@@ -187,7 +197,10 @@ export const selectSummary = createSelector(
     for (const transaction of visible) {
       totalMinor += transaction.amountMinor;
       if (transaction.amountMinor > largestMinor) largestMinor = transaction.amountMinor;
-      byCategory.set(transaction.category, (byCategory.get(transaction.category) ?? 0) + transaction.amountMinor);
+      byCategory.set(
+        transaction.category,
+        (byCategory.get(transaction.category) ?? 0) + transaction.amountMinor,
+      );
     }
 
     let topCategory: Category | null = null;

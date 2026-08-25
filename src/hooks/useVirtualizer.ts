@@ -52,8 +52,11 @@ export function calculateVirtualRange({
   const firstVisible = Math.floor(safeScrollTop / itemHeight);
   const visibleCount = Math.ceil(viewportHeight / itemHeight) + 1;
 
-  const startIndex = Math.max(0, firstVisible - overscan);
   const endIndex = Math.min(itemCount, firstVisible + visibleCount + overscan);
+  // Clamped against endIndex as well: when the list shrinks under a filter the
+  // container can briefly report a scroll position past the new end, and an
+  // inverted range would render nothing at all.
+  const startIndex = Math.min(Math.max(0, firstVisible - overscan), endIndex);
 
   return { startIndex, endIndex };
 }
@@ -88,13 +91,19 @@ export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
     setElement(node);
   }, []);
 
+  // No reset when the element detaches: a stale height is harmless, because
+  // nothing is rendered while the container is unmounted, and the next mount
+  // measures again.
   useLayoutEffect(() => {
-    if (!element) {
-      setViewportHeight(0);
-      return;
-    }
+    if (!element) return;
 
-    const measure = () => setViewportHeight(element.clientHeight);
+    const measure = () => {
+      // Reading layout and storing it is the one case where setting state from
+      // a layout effect is correct — an element's rendered height cannot be
+      // known any other way.
+      setViewportHeight(element.clientHeight);
+    };
+
     measure();
 
     if (typeof ResizeObserver === 'undefined') return;
@@ -124,17 +133,6 @@ export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
       }
     };
   }, [element]);
-
-  // A shorter result list can leave the container scrolled past its new end.
-  useEffect(() => {
-    if (!element) return;
-
-    const maxScrollTop = Math.max(0, itemCount * itemHeight - element.clientHeight);
-    if (element.scrollTop > maxScrollTop) {
-      element.scrollTop = maxScrollTop;
-      setScrollTop(maxScrollTop);
-    }
-  }, [element, itemCount, itemHeight]);
 
   const scrollToTop = useCallback(() => {
     const node = elementRef.current;

@@ -17,7 +17,13 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
-export const PAYMENT_METHODS = ['Card', 'Apple Pay', 'Google Pay', 'Direct Debit', 'Transfer'] as const;
+export const PAYMENT_METHODS = [
+  'Card',
+  'Apple Pay',
+  'Google Pay',
+  'Direct Debit',
+  'Transfer',
+] as const;
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 

@@ -62,13 +62,19 @@ describe('filtersSlice', () => {
 
   describe('date range', () => {
     it('pushes the end date forward when the start moves past it', () => {
-      const state = reducer({ ...initialState, dateTo: '2025-01-31' }, dateFromChanged('2025-06-01'));
+      const state = reducer(
+        { ...initialState, dateTo: '2025-01-31' },
+        dateFromChanged('2025-06-01'),
+      );
       expect(state.dateFrom).toBe('2025-06-01');
       expect(state.dateTo).toBe('2025-06-01');
     });
 
     it('pulls the start date back when the end moves before it', () => {
-      const state = reducer({ ...initialState, dateFrom: '2025-06-01' }, dateToChanged('2025-01-31'));
+      const state = reducer(
+        { ...initialState, dateFrom: '2025-06-01' },
+        dateToChanged('2025-01-31'),
+      );
       expect(state.dateFrom).toBe('2025-01-31');
       expect(state.dateTo).toBe('2025-01-31');
     });
@@ -124,7 +130,6 @@ describe('filtersSlice', () => {
         sortDirection: 'asc',
       });
     });
-
   });
 
   it('returns to the initial state on reset', () => {

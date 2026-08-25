@@ -66,11 +66,7 @@ const uiSlice = createSlice({
   },
 });
 
-export const {
-  themeToggled,
-  themeSet,
-  transactionSelected,
-  transactionDeselected,
-} = uiSlice.actions;
+export const { themeToggled, themeSet, transactionSelected, transactionDeselected } =
+  uiSlice.actions;
 
 export default uiSlice.reducer;

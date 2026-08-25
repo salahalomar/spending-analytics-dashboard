@@ -44,7 +44,9 @@ describe('App', () => {
       const { user, store } = await renderLoaded();
 
       const before = Number(store.getState().transactions.items.length);
-      expect(screen.getByTestId('result-count')).toHaveTextContent(`of ${before.toLocaleString('en-GB')}`);
+      expect(screen.getByTestId('result-count')).toHaveTextContent(
+        `of ${before.toLocaleString('en-GB')}`,
+      );
 
       await user.click(screen.getByTestId('category-chip-Groceries'));
 

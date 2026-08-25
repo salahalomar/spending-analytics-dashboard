@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithStore } from '@/test/renderWithStore';
 import { makeTransaction } from '@/test/fixtures';
 import { initialState as transactionsInitialState } from '@/features/transactions/transactionsSlice';
@@ -106,6 +106,17 @@ describe('MonthlyTrendChart', () => {
 
     fireEvent.pointerLeave(chart);
     expect(screen.queryByTestId('trend-tooltip')).not.toBeInTheDocument();
+  });
+
+  it('exposes the series as a table for assistive technology', () => {
+    renderChart();
+
+    const table = screen.getByRole('table', { name: /spend per month/i });
+    expect(within(table).getByRole('rowheader', { name: 'May 25' })).toBeInTheDocument();
+    expect(within(table).getByRole('cell', { name: '£250.00' })).toBeInTheDocument();
+
+    // One header row plus one row per month.
+    expect(within(table).getAllByRole('row')).toHaveLength(4);
   });
 
   it('says so when the selection is empty', () => {

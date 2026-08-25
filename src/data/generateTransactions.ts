@@ -1,4 +1,10 @@
-import { CATEGORIES, PAYMENT_METHODS, type Category, type Transaction, type TransactionStatus } from '@/types/transaction';
+import {
+  CATEGORIES,
+  PAYMENT_METHODS,
+  type Category,
+  type Transaction,
+  type TransactionStatus,
+} from '@/types/transaction';
 import { CATEGORY_PROFILES, DESCRIPTION_TEMPLATES } from '@/data/merchants';
 import { gaussian, mulberry32, pick, pickWeighted, type Rng } from '@/data/random';
 
@@ -125,4 +131,3 @@ export function getDatasetDateRange(options: GenerateOptions = {}): { start: str
     end: new Date(endMs).toISOString().slice(0, 10),
   };
 }
-

@@ -36,7 +36,9 @@ describe('generateTransactions', () => {
   });
 
   it('gives every transaction a unique id', () => {
-    expect(new Set(transactions.map((transaction) => transaction.id)).size).toBe(transactions.length);
+    expect(new Set(transactions.map((transaction) => transaction.id)).size).toBe(
+      transactions.length,
+    );
   });
 
   it('keeps timestamps inside the dataset window', () => {

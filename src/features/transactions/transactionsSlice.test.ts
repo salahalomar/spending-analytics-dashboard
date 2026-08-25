@@ -1,10 +1,6 @@
 import { createStore } from '@/app/store';
 import { makeTransactionSet } from '@/test/fixtures';
-import reducer, {
-  initialState,
-  loadTransactions,
-  transactionsReceived,
-} from './transactionsSlice';
+import reducer, { initialState, loadTransactions, transactionsReceived } from './transactionsSlice';
 
 describe('transactionsSlice', () => {
   it('starts empty and idle', () => {

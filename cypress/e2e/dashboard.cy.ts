@@ -31,7 +31,9 @@ describe('Spending analytics dashboard', () => {
     // ---- 1. The dataset loads and the headline figures are populated ----
     cy.byTestId('dataset-summary').should('contain', '50,000 transactions');
     cy.byTestId('result-count').should('contain', '50,000 of 50,000');
-    cy.byTestId('summary-total').invoke('text').should('match', /^£[\d,]+\.\d{2}$/);
+    cy.byTestId('summary-total')
+      .invoke('text')
+      .should('match', /^£[\d,]+\.\d{2}$/);
     cy.byTestId('summary-count').should('have.text', '50,000');
 
     // ---- 2. Only a window of the 50,000 rows is ever in the DOM ----
@@ -71,15 +73,14 @@ describe('Spending analytics dashboard', () => {
 
     // ---- 7. Sorting by amount reorders the list ----
     cy.byTestId('sort-amount').click().should('have.attr', 'aria-pressed', 'true');
-    cy.byTestId('transaction-row')
-      .then(($rows) => {
-        const amounts = [...$rows].map(($row) => {
-          const text = $row.querySelector('[class*="amountCell"]')?.textContent ?? '0';
-          return Number(text.replace(/[£,]/g, ''));
-        });
-        // Descending by default.
-        expect(amounts).to.deep.equal([...amounts].sort((a, b) => b - a));
+    cy.byTestId('transaction-row').then(($rows) => {
+      const amounts = [...$rows].map(($row) => {
+        const text = $row.querySelector('[class*="amountCell"]')?.textContent ?? '0';
+        return Number(text.replace(/[£,]/g, ''));
       });
+      // Descending by default.
+      expect(amounts).to.deep.equal([...amounts].sort((a, b) => b - a));
+    });
 
     // ---- 8. Selecting a row opens its details ----
     cy.byTestId('transaction-detail').should('not.exist');
@@ -121,14 +122,16 @@ describe('Spending analytics dashboard', () => {
   });
 
   it('remembers the chosen theme across a reload', () => {
-    cy.get('html').invoke('attr', 'data-theme').then((initial) => {
-      const next = initial === 'dark' ? 'light' : 'dark';
+    cy.get('html')
+      .invoke('attr', 'data-theme')
+      .then((initial) => {
+        const next = initial === 'dark' ? 'light' : 'dark';
 
-      cy.byTestId('theme-toggle').click();
-      cy.get('html').should('have.attr', 'data-theme', next);
+        cy.byTestId('theme-toggle').click();
+        cy.get('html').should('have.attr', 'data-theme', next);
 
-      cy.reload();
-      cy.get('html').should('have.attr', 'data-theme', next);
-    });
+        cy.reload();
+        cy.get('html').should('have.attr', 'data-theme', next);
+      });
   });
 });

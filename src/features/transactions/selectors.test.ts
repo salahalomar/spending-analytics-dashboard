@@ -1,5 +1,8 @@
 import type { RootState } from '@/app/store';
-import { initialState as filtersInitialState, type FiltersState } from '@/features/filters/filtersSlice';
+import {
+  initialState as filtersInitialState,
+  type FiltersState,
+} from '@/features/filters/filtersSlice';
 import { initialState as uiInitialState } from '@/features/ui/uiSlice';
 import { initialState as transactionsInitialState } from '@/features/transactions/transactionsSlice';
 import { makeTransaction, makeTransactionSet } from '@/test/fixtures';
@@ -100,14 +103,16 @@ describe('selectFilteredTransactions', () => {
   });
 
   it('filters by status', () => {
-    expect(selectFilteredTransactions(buildState(dataset, { statuses: ['pending'] }))).toHaveLength(1);
+    expect(selectFilteredTransactions(buildState(dataset, { statuses: ['pending'] }))).toHaveLength(
+      1,
+    );
   });
 
   it('filters by an inclusive amount range', () => {
     expect(
-      selectFilteredTransactions(buildState(dataset, { minAmount: '25', maxAmount: '75' })).map(
-        (item) => item.id,
-      ).sort(),
+      selectFilteredTransactions(buildState(dataset, { minAmount: '25', maxAmount: '75' }))
+        .map((item) => item.id)
+        .sort(),
     ).toEqual(['a', 'b', 'd']);
   });
 

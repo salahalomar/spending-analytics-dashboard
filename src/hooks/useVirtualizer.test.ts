@@ -57,6 +57,21 @@ describe('calculateVirtualRange', () => {
     });
   });
 
+  it('never returns an inverted range when the list shrinks under the scroll position', () => {
+    // The container still reports a deep scroll position while the filtered
+    // list has already collapsed to a handful of rows.
+    const range = calculateVirtualRange({
+      scrollTop: 49_500,
+      viewportHeight: 500,
+      itemHeight: 50,
+      itemCount: 3,
+      overscan: 8,
+    });
+
+    expect(range.startIndex).toBeLessThanOrEqual(range.endIndex);
+    expect(range.endIndex).toBe(3);
+  });
+
   it('renders a window far smaller than the list itself', () => {
     const range = calculateVirtualRange({ ...base, itemCount: 50_000, overscan: 8 });
     expect(range.endIndex - range.startIndex).toBeLessThan(30);

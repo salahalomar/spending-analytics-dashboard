@@ -3,6 +3,9 @@
 A personal-finance analytics dashboard that loads **50,000 transactions** in the browser and keeps
 filtering, sorting and charting them at interactive speed.
 
+[![CI](https://github.com/salahalomar/spending-analytics-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/salahalomar/spending-analytics-dashboard/actions/workflows/ci.yml)
+[![Deploy](https://github.com/salahalomar/spending-analytics-dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/salahalomar/spending-analytics-dashboard/actions/workflows/deploy.yml)
+
 **[Live demo →](https://salahalomar.github.io/spending-analytics-dashboard/)**
 
 ![The dashboard in dark mode](docs/dashboard-dark.png)
@@ -30,14 +33,14 @@ filtering, sorting and charting them at interactive speed.
 
 ## Built with
 
-| Concern | Choice |
-| --- | --- |
-| UI | React 18 + TypeScript (strict) |
-| State | Redux Toolkit + Reselect |
-| Build | Vite 6 |
-| Unit / integration tests | Jest + React Testing Library |
-| End-to-end tests | Cypress |
-| CI | GitHub Actions |
+| Concern                  | Choice                         |
+| ------------------------ | ------------------------------ |
+| UI                       | React 18 + TypeScript (strict) |
+| State                    | Redux Toolkit + Reselect       |
+| Build                    | Vite 6                         |
+| Unit / integration tests | Jest + React Testing Library   |
+| End-to-end tests         | Cypress                        |
+| CI                       | GitHub Actions                 |
 
 There is no charting library and no virtual-list library — both are implemented here, because the
 interesting parts of this project are exactly those two problems.
@@ -88,33 +91,33 @@ Then open http://localhost:5173.
 
 ### Scripts
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Dev server with hot reload |
-| `npm run build` | Typecheck, then production build to `dist/` |
-| `npm run preview` | Serve the production build on port 4173 |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | Jest unit and integration tests |
-| `npm run test:coverage` | The same, with a coverage report |
-| `npm run cy:open` | Cypress in interactive mode |
-| `npm run e2e` | Build-and-serve, then run Cypress headlessly |
+| Command                 | What it does                                 |
+| ----------------------- | -------------------------------------------- |
+| `npm run dev`           | Dev server with hot reload                   |
+| `npm run build`         | Typecheck, then production build to `dist/`  |
+| `npm run preview`       | Serve the production build on port 4173      |
+| `npm run typecheck`     | `tsc --noEmit`                               |
+| `npm test`              | Jest unit and integration tests              |
+| `npm run test:coverage` | The same, with a coverage report             |
+| `npm run cy:open`       | Cypress in interactive mode                  |
+| `npm run e2e`           | Build-and-serve, then run Cypress headlessly |
 
 ## Testing
 
-**203 Jest tests at ~97% statement coverage**, with the threshold enforced in
+**211 Jest tests at ~97% statement coverage**, with the threshold enforced in
 [`jest.config.cjs`](jest.config.cjs) so it cannot quietly rot.
 
 The suite is layered rather than uniform:
 
-- *Pure logic* — the PRNG, the generator, the scale maths and the virtualiser's range calculation
+- _Pure logic_ — the PRNG, the generator, the scale maths and the virtualiser's range calculation
   are tested directly as functions.
-- *Reducers and selectors* — tested against hand-checkable fixtures, including boundary days on
+- _Reducers and selectors_ — tested against hand-checkable fixtures, including boundary days on
   date ranges and the previous-period comparison.
-- *Components* — rendered against a **real store**, not a mocked one, so the reducers and selectors
+- _Components_ — rendered against a **real store**, not a mocked one, so the reducers and selectors
   are exercised as part of the test. The list is asserted to render ~20 rows for a 5,000-row dataset
   while still reporting the full count; the debounce is verified by dispatch count, so typing
   "tesco" must produce exactly one action.
-- *Integration* — [`App.test.tsx`](src/App.test.tsx) drives the whole dashboard through the UI.
+- _Integration_ — [`App.test.tsx`](src/App.test.tsx) drives the whole dashboard through the UI.
 
 [`jest.setup.ts`](jest.setup.ts) supplies what jsdom lacks: element dimensions, `ResizeObserver`,
 and a `PointerEvent` built on `MouseEvent` so the chart's pointer handling can be exercised.
@@ -148,13 +151,30 @@ cypress/
 The repository is set up for three hosts, each needing no extra configuration:
 
 - **GitHub Pages** — [`deploy.yml`](.github/workflows/deploy.yml) builds and publishes on every
-  push to `main`. Requires *Settings → Pages → Source: GitHub Actions* once; the workflow token
+  push to `main`. Requires _Settings → Pages → Source: GitHub Actions_ once; the workflow token
   cannot create the Pages site itself.
 - **Vercel** — import the repository; [`vercel.json`](vercel.json) supplies the rest.
 - **Netlify** — import the repository; [`netlify.toml`](netlify.toml) supplies the rest.
 
 Pages serves a project repo from a subpath, so the deploy workflow passes `DEPLOY_BASE` to Vite.
 Vercel and Netlify serve from the root and need no override.
+
+## Accessibility
+
+Not an afterthought, and not just labels:
+
+- The virtualised list is a real `list`/`listitem` structure where each row
+  reports `aria-setsize` of the **full** result count and its true `aria-posinset`, so a screen
+  reader announces "row 12,481 of 50,000" rather than "12 of 20".
+- Each row is a toggle wired to the detail panel with `aria-expanded` and `aria-controls`, and
+  dismissing the panel hands focus back to the row rather than dropping it to the top of the page.
+- The trend chart carries the same figures as a visually hidden table, so the series is readable
+  rather than being an unlabelled graphic, and it can be stepped through with the arrow keys.
+- Filter chips are `aria-pressed` toggles, the result count is an `aria-live` region, and every
+  interactive element has a single visible focus treatment.
+- Motion is dropped entirely under `prefers-reduced-motion`.
+
+ESLint runs `jsx-a11y` over the source as part of CI.
 
 ## Notes on the data
 

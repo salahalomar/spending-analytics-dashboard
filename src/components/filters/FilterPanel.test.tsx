@@ -51,7 +51,9 @@ describe('FilterPanel', () => {
 
       const searchDispatches = dispatch.mock.calls.filter(
         ([action]) =>
-          typeof action === 'object' && action !== null && 'type' in action &&
+          typeof action === 'object' &&
+          action !== null &&
+          'type' in action &&
           action.type === 'filters/merchantQueryChanged',
       );
       expect(searchDispatches).toHaveLength(1);
