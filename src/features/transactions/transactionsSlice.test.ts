@@ -3,7 +3,6 @@ import { makeTransactionSet } from '@/test/fixtures';
 import reducer, {
   initialState,
   loadTransactions,
-  transactionsCleared,
   transactionsReceived,
 } from './transactionsSlice';
 
@@ -17,11 +16,6 @@ describe('transactionsSlice', () => {
     const state = reducer(initialState, transactionsReceived(items));
     expect(state.items).toEqual(items);
     expect(state.status).toBe('succeeded');
-  });
-
-  it('clears back to idle', () => {
-    const loaded = reducer(initialState, transactionsReceived(makeTransactionSet()));
-    expect(reducer(loaded, transactionsCleared())).toEqual(initialState);
   });
 
   describe('loadTransactions', () => {

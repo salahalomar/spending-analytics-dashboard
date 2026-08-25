@@ -58,10 +58,6 @@ export function endOfDayMs(dateInput: string): number | null {
   return start === null ? null : start + MS_PER_DAY - 1;
 }
 
-export function daysBetween(startMs: number, endMs: number): number {
-  return Math.max(1, Math.round((endMs - startMs) / MS_PER_DAY));
-}
-
 /** Subtracts whole days from a `YYYY-MM-DD` value, keeping the same format. */
 export function shiftDateInput(dateInput: string, days: number): string {
   const start = startOfDayMs(dateInput);

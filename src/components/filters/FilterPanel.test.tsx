@@ -117,6 +117,32 @@ describe('FilterPanel', () => {
     });
   });
 
+  describe('statuses', () => {
+    it('toggles a status on and off', async () => {
+      const user = userEvent.setup();
+      const { store } = renderPanel();
+      const chip = screen.getByTestId('status-chip-pending');
+
+      await user.click(chip);
+      expect(store.getState().filters.statuses).toEqual(['pending']);
+      expect(chip).toHaveAttribute('aria-pressed', 'true');
+
+      await user.click(chip);
+      expect(store.getState().filters.statuses).toEqual([]);
+    });
+
+    it('narrows the list to the selected status', async () => {
+      const user = userEvent.setup();
+      renderPanel();
+
+      // The fixture set has a single pending transaction.
+      await user.click(screen.getByTestId('status-chip-pending'));
+      await waitFor(() =>
+        expect(screen.getByTestId('result-count')).toHaveTextContent('1 of 5 transactions'),
+      );
+    });
+  });
+
   describe('date range', () => {
     it('applies a preset', async () => {
       const user = userEvent.setup();

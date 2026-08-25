@@ -10,6 +10,7 @@ import { AmountFilter } from './AmountFilter';
 import { CategoryFilter } from './CategoryFilter';
 import { DateRangeFilter } from './DateRangeFilter';
 import { MerchantSearch } from './MerchantSearch';
+import { StatusFilter } from './StatusFilter';
 import styles from './FilterPanel.module.css';
 
 export function FilterPanel() {
@@ -34,6 +35,7 @@ export function FilterPanel() {
 
       <MerchantSearch />
       <CategoryFilter />
+      <StatusFilter />
       <DateRangeFilter />
       <AmountFilter />
 

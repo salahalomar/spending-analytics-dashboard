@@ -1,6 +1,5 @@
 import reducer, {
   categoriesCleared,
-  categoriesSet,
   categoryToggled,
   dateFromChanged,
   datePresetApplied,
@@ -11,7 +10,6 @@ import reducer, {
   merchantQueryChanged,
   minAmountChanged,
   sortChanged,
-  sortDirectionChanged,
   statusToggled,
 } from './filtersSlice';
 
@@ -41,13 +39,16 @@ describe('filtersSlice', () => {
     });
 
     it('keeps unrelated categories when toggling one off', () => {
-      let state = reducer(initialState, categoriesSet(['Groceries', 'Travel', 'Health']));
+      let state = reducer(initialState, categoryToggled('Groceries'));
+      state = reducer(state, categoryToggled('Travel'));
+      state = reducer(state, categoryToggled('Health'));
       state = reducer(state, categoryToggled('Travel'));
       expect(state.categories).toEqual(['Groceries', 'Health']);
     });
 
     it('clears every selection', () => {
-      const state = reducer(initialState, categoriesSet(['Groceries', 'Travel']));
+      let state = reducer(initialState, categoryToggled('Groceries'));
+      state = reducer(state, categoryToggled('Travel'));
       expect(reducer(state, categoriesCleared()).categories).toEqual([]);
     });
   });
@@ -124,9 +125,6 @@ describe('filtersSlice', () => {
       });
     });
 
-    it('can be set directly', () => {
-      expect(reducer(initialState, sortDirectionChanged('asc')).sortDirection).toBe('asc');
-    });
   });
 
   it('returns to the initial state on reset', () => {

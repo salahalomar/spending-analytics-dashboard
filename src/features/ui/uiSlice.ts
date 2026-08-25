@@ -6,7 +6,6 @@ export interface UiState {
   theme: Theme;
   /** Id of the row whose details are shown in the docked panel, if any. */
   selectedTransactionId: string | null;
-  filtersPanelOpen: boolean;
 }
 
 const THEME_STORAGE_KEY = 'spending-analytics:theme';
@@ -34,7 +33,6 @@ export function readInitialTheme(): Theme {
 export const initialState: UiState = {
   theme: readInitialTheme(),
   selectedTransactionId: null,
-  filtersPanelOpen: true,
 };
 
 function persistTheme(theme: Theme): void {
@@ -65,9 +63,6 @@ const uiSlice = createSlice({
     transactionDeselected(state) {
       state.selectedTransactionId = null;
     },
-    filtersPanelToggled(state) {
-      state.filtersPanelOpen = !state.filtersPanelOpen;
-    },
   },
 });
 
@@ -76,7 +71,6 @@ export const {
   themeSet,
   transactionSelected,
   transactionDeselected,
-  filtersPanelToggled,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

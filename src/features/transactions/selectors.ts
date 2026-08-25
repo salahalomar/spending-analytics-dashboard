@@ -77,7 +77,7 @@ const selectAmountBounds = createSelector([selectMinAmount, selectMaxAmount], (m
   maxMinor: parseAmountToMinor(max),
 }));
 
-export const selectDateBounds = createSelector([selectDateFrom, selectDateTo], (from, to) => ({
+const selectDateBounds = createSelector([selectDateFrom, selectDateTo], (from, to) => ({
   fromMs: startOfDayMs(from),
   toMs: endOfDayMs(to),
 }));
@@ -298,31 +298,6 @@ export const selectSpendByMonth = createSelector(
     );
   },
 );
-
-export interface MerchantDatum {
-  merchant: string;
-  totalMinor: number;
-  count: number;
-}
-
-/** The biggest merchants by spend in the current selection. */
-export const selectTopMerchants = createSelector([selectFilteredTransactions], (transactions): MerchantDatum[] => {
-  const totals = new Map<string, { totalMinor: number; count: number }>();
-
-  for (const transaction of transactions) {
-    const entry = totals.get(transaction.merchant);
-    if (entry) {
-      entry.totalMinor += transaction.amountMinor;
-      entry.count += 1;
-    } else {
-      totals.set(transaction.merchant, { totalMinor: transaction.amountMinor, count: 1 });
-    }
-  }
-
-  return Array.from(totals, ([merchant, entry]) => ({ merchant, ...entry }))
-    .sort((a, b) => b.totalMinor - a.totalMinor)
-    .slice(0, 8);
-});
 
 /** True when the user has narrowed the dataset in any way. */
 export const selectHasActiveFilters = createSelector([selectFilters], (filters) => {

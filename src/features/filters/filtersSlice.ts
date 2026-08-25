@@ -59,9 +59,6 @@ const filtersSlice = createSlice({
         state.categories.splice(index, 1);
       }
     },
-    categoriesSet(state, action: PayloadAction<Category[]>) {
-      state.categories = action.payload;
-    },
     categoriesCleared(state) {
       state.categories = [];
     },
@@ -115,9 +112,6 @@ const filtersSlice = createSlice({
         state.sortDirection = action.payload === 'merchant' ? 'asc' : 'desc';
       }
     },
-    sortDirectionChanged(state, action: PayloadAction<SortDirection>) {
-      state.sortDirection = action.payload;
-    },
     filtersReset() {
       return initialState;
     },
@@ -127,7 +121,6 @@ const filtersSlice = createSlice({
 export const {
   merchantQueryChanged,
   categoryToggled,
-  categoriesSet,
   categoriesCleared,
   statusToggled,
   dateFromChanged,
@@ -136,7 +129,6 @@ export const {
   minAmountChanged,
   maxAmountChanged,
   sortChanged,
-  sortDirectionChanged,
   filtersReset,
 } = filtersSlice.actions;
 

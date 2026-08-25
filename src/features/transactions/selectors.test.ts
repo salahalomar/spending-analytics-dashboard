@@ -13,7 +13,6 @@ import {
   selectSpendByCategory,
   selectSpendByMonth,
   selectSummary,
-  selectTopMerchants,
   selectVisibleTransactions,
 } from './selectors';
 
@@ -275,21 +274,6 @@ describe('selectSpendByMonth', () => {
       { month: '2025-06', totalMinor: 100, count: 1 },
       { month: '2025-07', totalMinor: 200, count: 1 },
     ]);
-  });
-});
-
-describe('selectTopMerchants', () => {
-  it('ranks merchants by spend and combines their transactions', () => {
-    const result = selectTopMerchants(buildState(dataset));
-    expect(result[0]).toEqual({ merchant: 'Tesco', totalMinor: 12_500, count: 2 });
-    expect(result[1]).toEqual({ merchant: 'Amazon', totalMinor: 12_000, count: 1 });
-  });
-
-  it('caps the list at eight entries', () => {
-    const many = Array.from({ length: 30 }, (_, index) =>
-      makeTransaction({ merchant: `Merchant ${index}`, amountMinor: index * 100 + 100 }),
-    );
-    expect(selectTopMerchants(buildState(many, { dateFrom: '', dateTo: '' }))).toHaveLength(8);
   });
 });
 

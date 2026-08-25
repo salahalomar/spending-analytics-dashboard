@@ -101,7 +101,7 @@ Then open http://localhost:5173.
 
 ## Testing
 
-**194 Jest tests at ~96% statement coverage**, with the threshold enforced in
+**189 Jest tests at ~97% statement coverage**, with the threshold enforced in
 [`jest.config.cjs`](jest.config.cjs) so it cannot quietly rot.
 
 The suite is layered rather than uniform:

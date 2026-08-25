@@ -1,5 +1,4 @@
 import reducer, {
-  filtersPanelToggled,
   initialState,
   themeSet,
   themeToggled,
@@ -41,10 +40,5 @@ describe('uiSlice', () => {
   it('deselects explicitly', () => {
     const selected = reducer(initialState, transactionSelected('txn_1'));
     expect(reducer(selected, transactionDeselected()).selectedTransactionId).toBeNull();
-  });
-
-  it('toggles the filters panel', () => {
-    const closed = reducer(initialState, filtersPanelToggled());
-    expect(closed.filtersPanelOpen).toBe(!initialState.filtersPanelOpen);
   });
 });

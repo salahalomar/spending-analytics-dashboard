@@ -24,7 +24,6 @@ export interface UseVirtualizerResult<T extends HTMLElement> {
   virtualItems: VirtualItem[];
   totalHeight: number;
   range: VirtualRange;
-  scrollToIndex: (index: number) => void;
   scrollToTop: () => void;
 }
 
@@ -137,17 +136,6 @@ export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
     }
   }, [element, itemCount, itemHeight]);
 
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      const node = elementRef.current;
-      if (!node) return;
-      const clamped = Math.min(Math.max(index, 0), Math.max(0, itemCount - 1));
-      node.scrollTop = clamped * itemHeight;
-      setScrollTop(node.scrollTop);
-    },
-    [itemCount, itemHeight],
-  );
-
   const scrollToTop = useCallback(() => {
     const node = elementRef.current;
     if (!node) return;
@@ -173,7 +161,6 @@ export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
     virtualItems,
     totalHeight: itemCount * itemHeight,
     range,
-    scrollToIndex,
     scrollToTop,
   };
 }

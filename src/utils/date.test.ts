@@ -1,5 +1,4 @@
 import {
-  daysBetween,
   endOfDayMs,
   formatDate,
   formatMonthLabel,
@@ -47,17 +46,6 @@ describe('shiftDateInput', () => {
 
   it('returns the input unchanged when it cannot be parsed', () => {
     expect(shiftDateInput('nonsense', -30)).toBe('nonsense');
-  });
-});
-
-describe('daysBetween', () => {
-  it('counts whole days', () => {
-    expect(daysBetween(Date.parse('2025-01-01T00:00:00Z'), Date.parse('2025-01-31T00:00:00Z'))).toBe(30);
-  });
-
-  it('never returns less than a day', () => {
-    const now = Date.parse('2025-01-01T00:00:00Z');
-    expect(daysBetween(now, now)).toBe(1);
   });
 });
 

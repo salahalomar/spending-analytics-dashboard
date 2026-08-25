@@ -55,12 +55,6 @@ const transactionsSlice = createSlice({
       state.status = 'succeeded';
       state.error = null;
     },
-    transactionsCleared(state) {
-      state.items = [];
-      state.status = 'idle';
-      state.error = null;
-      state.generatedInMs = null;
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -80,5 +74,5 @@ const transactionsSlice = createSlice({
   },
 });
 
-export const { transactionsReceived, transactionsCleared } = transactionsSlice.actions;
+export const { transactionsReceived } = transactionsSlice.actions;
 export default transactionsSlice.reducer;
