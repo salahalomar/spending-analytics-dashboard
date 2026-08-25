@@ -1,0 +1,42 @@
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  color: var(--text-faint);
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.message {
+  max-width: 380px;
+  font-size: 13px;
+}
+
+.action {
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.action:hover {
+  filter: brightness(1.08);
+}

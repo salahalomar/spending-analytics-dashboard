@@ -4,8 +4,8 @@ export type Theme = 'dark' | 'light';
 
 export interface UiState {
   theme: Theme;
-  /** Id of the row currently expanded in the transaction list, if any. */
-  expandedTransactionId: string | null;
+  /** Id of the row whose details are shown in the docked panel, if any. */
+  selectedTransactionId: string | null;
   filtersPanelOpen: boolean;
 }
 
@@ -33,7 +33,7 @@ export function readInitialTheme(): Theme {
 
 export const initialState: UiState = {
   theme: readInitialTheme(),
-  expandedTransactionId: null,
+  selectedTransactionId: null,
   filtersPanelOpen: true,
 };
 
@@ -57,13 +57,13 @@ const uiSlice = createSlice({
       state.theme = action.payload;
       persistTheme(state.theme);
     },
-    /** Clicking the open row collapses it again. */
-    transactionExpanded(state, action: PayloadAction<string>) {
-      state.expandedTransactionId =
-        state.expandedTransactionId === action.payload ? null : action.payload;
+    /** Clicking the already-selected row clears the selection again. */
+    transactionSelected(state, action: PayloadAction<string>) {
+      state.selectedTransactionId =
+        state.selectedTransactionId === action.payload ? null : action.payload;
     },
-    transactionCollapsed(state) {
-      state.expandedTransactionId = null;
+    transactionDeselected(state) {
+      state.selectedTransactionId = null;
     },
     filtersPanelToggled(state) {
       state.filtersPanelOpen = !state.filtersPanelOpen;
@@ -74,8 +74,8 @@ const uiSlice = createSlice({
 export const {
   themeToggled,
   themeSet,
-  transactionExpanded,
-  transactionCollapsed,
+  transactionSelected,
+  transactionDeselected,
   filtersPanelToggled,
 } = uiSlice.actions;
 
