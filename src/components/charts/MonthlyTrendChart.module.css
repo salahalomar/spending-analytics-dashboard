@@ -1,0 +1,94 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.svg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.axisLabel {
+  fill: var(--text-faint);
+  font-size: 10px;
+}
+
+.line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.guide {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.marker {
+  fill: var(--bg-elevated);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.hitArea {
+  fill: transparent;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 5;
+  min-width: 132px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.tooltipMonth {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tooltipValue {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tooltipCount {
+  display: block;
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 13px;
+  color: var(--text-muted);
+}
