@@ -14,7 +14,9 @@
     "test:coverage": "jest --coverage",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "e2e": "start-server-and-test preview http://localhost:4173 cy:run"
+    "e2e": "start-server-and-test preview http://localhost:4173 cy:run",
+    "capture:screenshots": "cypress run --config specPattern=cypress/capture/**/*.cy.ts,screenshotsFolder=docs/raw",
+    "e2e:capture": "start-server-and-test preview http://localhost:4173 capture:screenshots"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.0",
