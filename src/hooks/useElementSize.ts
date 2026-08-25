@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 
 export interface ElementSize {
   width: number;
@@ -10,18 +10,23 @@ export interface ElementSize {
  *
  * The SVG charts draw at real pixel coordinates rather than scaling a fixed
  * viewBox, which keeps stroke widths and text at their intended size on every
- * viewport.
+ * viewport. A callback ref is used so the element is measured whenever it
+ * attaches, including after a conditional remount.
  */
 export function useElementSize<T extends HTMLElement = HTMLDivElement>(): [
-  React.MutableRefObject<T | null>,
+  (element: T | null) => void,
   ElementSize,
 ] {
-  const ref = useRef<T | null>(null);
+  const [element, setElement] = useState<T | null>(null);
   const [size, setSize] = useState<ElementSize>({ width: 0, height: 0 });
 
+  const ref = useCallback((node: T | null) => setElement(node), []);
+
   useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
+    if (!element) {
+      setSize({ width: 0, height: 0 });
+      return;
+    }
 
     const measure = () => {
       setSize((current) =>
@@ -38,7 +43,7 @@ export function useElementSize<T extends HTMLElement = HTMLDivElement>(): [
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [element]);
 
   return [ref, size];
 }

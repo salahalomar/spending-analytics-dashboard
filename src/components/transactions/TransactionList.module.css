@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -120,8 +120,9 @@
   background: var(--bg-hover);
 }
 
-.rowExpanded {
+.rowSelected {
   background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .merchantCell {

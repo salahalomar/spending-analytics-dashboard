@@ -47,7 +47,6 @@ export function CategoryBarChart() {
               aria-pressed={isSelected}
               aria-label={`${datum.category}: ${formatCurrency(datum.totalMinor)} across ${datum.count} transactions. Toggle filter.`}
               data-testid={`category-bar-${datum.category}`}
-              style={{ border: 'none', padding: 0, width: '100%', display: 'block' }}
             >
               <span
                 className={styles.bar}
@@ -55,7 +54,6 @@ export function CategoryBarChart() {
                   width: `${widthPercent}%`,
                   background: categoryColorVar(datum.category),
                   opacity: isSelected || selected.length === 0 ? 1 : 0.35,
-                  display: 'block',
                 }}
               />
             </button>

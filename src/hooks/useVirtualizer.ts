@@ -19,7 +19,8 @@ export interface UseVirtualizerOptions {
 }
 
 export interface UseVirtualizerResult<T extends HTMLElement> {
-  scrollRef: React.MutableRefObject<T | null>;
+  /** Attach to the scroll container: `<div ref={scrollRef}>`. */
+  scrollRef: (element: T | null) => void;
   virtualItems: VirtualItem[];
   totalHeight: number;
   range: VirtualRange;
@@ -65,22 +66,34 @@ export function calculateVirtualRange({
  * 50,000 row list costs the same as a 20 row one. Scroll updates are coalesced
  * into an animation frame — the raw scroll event can fire far more often than
  * the browser paints, and re-rendering on every one of those is wasted work.
+ *
+ * The container is tracked with a callback ref rather than a ref object: the
+ * scroll container is mounted conditionally (it does not exist while the
+ * dataset is loading), and a mount-time effect would measure nothing and never
+ * run again.
  */
 export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
   itemCount,
   itemHeight,
   overscan = 6,
 }: UseVirtualizerOptions): UseVirtualizerResult<T> {
-  const scrollRef = useRef<T | null>(null);
+  const elementRef = useRef<T | null>(null);
   const frameRef = useRef<number | null>(null);
 
+  const [element, setElement] = useState<T | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
 
-  // Measure on mount and whenever the element resizes.
+  const scrollRef = useCallback((node: T | null) => {
+    elementRef.current = node;
+    setElement(node);
+  }, []);
+
   useLayoutEffect(() => {
-    const element = scrollRef.current;
-    if (!element) return;
+    if (!element) {
+      setViewportHeight(0);
+      return;
+    }
 
     const measure = () => setViewportHeight(element.clientHeight);
     measure();
@@ -90,10 +103,9 @@ export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [element]);
 
   useEffect(() => {
-    const element = scrollRef.current;
     if (!element) return;
 
     const handleScroll = () => {
@@ -112,11 +124,10 @@ export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
         frameRef.current = null;
       }
     };
-  }, []);
+  }, [element]);
 
   // A shorter result list can leave the container scrolled past its new end.
   useEffect(() => {
-    const element = scrollRef.current;
     if (!element) return;
 
     const maxScrollTop = Math.max(0, itemCount * itemHeight - element.clientHeight);
@@ -124,20 +135,25 @@ export function useVirtualizer<T extends HTMLElement = HTMLDivElement>({
       element.scrollTop = maxScrollTop;
       setScrollTop(maxScrollTop);
     }
-  }, [itemCount, itemHeight]);
+  }, [element, itemCount, itemHeight]);
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      const element = scrollRef.current;
-      if (!element) return;
+      const node = elementRef.current;
+      if (!node) return;
       const clamped = Math.min(Math.max(index, 0), Math.max(0, itemCount - 1));
-      element.scrollTop = clamped * itemHeight;
-      setScrollTop(element.scrollTop);
+      node.scrollTop = clamped * itemHeight;
+      setScrollTop(node.scrollTop);
     },
     [itemCount, itemHeight],
   );
 
-  const scrollToTop = useCallback(() => scrollToIndex(0), [scrollToIndex]);
+  const scrollToTop = useCallback(() => {
+    const node = elementRef.current;
+    if (!node) return;
+    node.scrollTop = 0;
+    setScrollTop(0);
+  }, []);
 
   const range = calculateVirtualRange({
     scrollTop,

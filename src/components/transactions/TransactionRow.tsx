@@ -46,7 +46,7 @@ function TransactionRowComponent({
     >
       <button
         type="button"
-        className={`${styles.row} ${isSelected ? styles.rowExpanded : ''}`}
+        className={`${styles.row} ${isSelected ? styles.rowSelected : ''}`}
         onClick={() => onSelect(transaction.id)}
         aria-expanded={isSelected}
         data-testid="transaction-row"

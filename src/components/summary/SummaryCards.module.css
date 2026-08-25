@@ -5,7 +5,7 @@
 }
 
 .card {
-  padding: 14px 16px;
+  padding: 12px 14px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -24,7 +24,7 @@
 .value {
   display: block;
   margin-top: 6px;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;

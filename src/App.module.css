@@ -26,7 +26,10 @@
 .content {
   min-height: 0;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  /* The charts row is bounded so the transaction list always keeps the
+     remaining height — an `auto` row here would let a tall chart squeeze the
+     list down to nothing. */
+  grid-template-rows: auto clamp(236px, 30vh, 330px) minmax(0, 1fr);
   gap: 16px;
   overflow: hidden;
 }
@@ -68,6 +71,11 @@
   .content {
     grid-template-rows: none;
     overflow: visible;
+  }
+
+  /* Stacked charts need their own height once the row track is gone. */
+  .charts {
+    grid-auto-rows: 300px;
   }
 
   .sidebar {
