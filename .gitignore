@@ -36,6 +36,3 @@ yarn-error.log*
 # Deploy
 .vercel
 .netlify
-
-# Local tooling
-.claude/

@@ -3,7 +3,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   height: 100%;
   margin: 0;
   padding: 0;
@@ -13,16 +13,19 @@
 
 .row {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr) 132px;
+  grid-template-columns: 92px minmax(0, 1fr) 132px;
   align-items: center;
   gap: 10px;
+  /* Tight enough that all ten categories fit the card without scrolling at
+     the heights the charts row is clamped to. */
+  line-height: 1.3;
 }
 
 .name {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -39,7 +42,7 @@
 .track {
   display: block;
   width: 100%;
-  height: 16px;
+  height: 15px;
   padding: 0;
   background: var(--bg-subtle);
   border: none;
@@ -59,7 +62,7 @@
   align-items: baseline;
   justify-content: flex-end;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
   color: var(--text);
 }
@@ -67,7 +70,7 @@
 .share {
   min-width: 34px;
   text-align: right;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 400;
   color: var(--text-faint);
 }
