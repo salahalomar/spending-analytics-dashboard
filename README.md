@@ -33,14 +33,15 @@ filtering, sorting and charting them at interactive speed.
 
 ## Built with
 
-| Concern                  | Choice                         |
-| ------------------------ | ------------------------------ |
-| UI                       | React 18 + TypeScript (strict) |
-| State                    | Redux Toolkit + Reselect       |
-| Build                    | Vite 6                         |
-| Unit / integration tests | Jest + React Testing Library   |
-| End-to-end tests         | Cypress                        |
-| CI                       | GitHub Actions                 |
+| Concern                  | Choice                                    |
+| ------------------------ | ----------------------------------------- |
+| UI                       | React 18 + TypeScript (strict)            |
+| State                    | Redux Toolkit + Reselect                  |
+| Build                    | Vite 6                                    |
+| Unit / integration tests | Jest + React Testing Library              |
+| End-to-end tests         | Cypress                                   |
+| Linting / formatting     | ESLint (type-aware + jsx-a11y) + Prettier |
+| CI                       | GitHub Actions                            |
 
 There is no charting library and no virtual-list library — both are implemented here, because the
 interesting parts of this project are exactly those two problems.
@@ -80,6 +81,23 @@ milliseconds and catches nothing here.
 The result: **~75 kB gzipped**, the dataset built in around 100–300 ms, and a row count in the DOM
 that stays flat no matter how far you scroll. The footer shows that number live.
 
+## Accessibility
+
+Not an afterthought, and not just labels:
+
+- The virtualised list is a real `list`/`listitem` structure where each row
+  reports `aria-setsize` of the **full** result count and its true `aria-posinset`, so a screen
+  reader announces "row 12,481 of 50,000" rather than "12 of 20".
+- Each row is a toggle wired to the detail panel with `aria-expanded` and `aria-controls`, and
+  dismissing the panel hands focus back to the row rather than dropping it to the top of the page.
+- The trend chart carries the same figures as a visually hidden table, so the series is readable
+  rather than being an unlabelled graphic, and it can be stepped through with the arrow keys.
+- Filter chips are `aria-pressed` toggles, the result count is an `aria-live` region, and every
+  interactive element has a single visible focus treatment.
+- Motion is dropped entirely under `prefers-reduced-motion`.
+
+ESLint runs `jsx-a11y` over the source as part of CI.
+
 ## Getting started
 
 ```bash
@@ -97,6 +115,8 @@ Then open http://localhost:5173.
 | `npm run build`         | Typecheck, then production build to `dist/`  |
 | `npm run preview`       | Serve the production build on port 4173      |
 | `npm run typecheck`     | `tsc --noEmit`                               |
+| `npm run lint`          | ESLint over source, tests and Cypress specs  |
+| `npm run format`        | Prettier write (`format:check` runs in CI)   |
 | `npm test`              | Jest unit and integration tests              |
 | `npm run test:coverage` | The same, with a coverage report             |
 | `npm run cy:open`       | Cypress in interactive mode                  |
@@ -139,6 +159,7 @@ src/
 ├── data/           Seeded PRNG and the transaction generator
 ├── features/       Redux slices and the selector layer
 ├── hooks/          useVirtualizer, useElementSize, useDebouncedValue
+├── test/           Store-aware render helper and fixtures
 ├── types/          Domain model
 └── utils/          Formatting, dates and chart scales
 cypress/
@@ -158,23 +179,6 @@ The repository is set up for three hosts, each needing no extra configuration:
 
 Pages serves a project repo from a subpath, so the deploy workflow passes `DEPLOY_BASE` to Vite.
 Vercel and Netlify serve from the root and need no override.
-
-## Accessibility
-
-Not an afterthought, and not just labels:
-
-- The virtualised list is a real `list`/`listitem` structure where each row
-  reports `aria-setsize` of the **full** result count and its true `aria-posinset`, so a screen
-  reader announces "row 12,481 of 50,000" rather than "12 of 20".
-- Each row is a toggle wired to the detail panel with `aria-expanded` and `aria-controls`, and
-  dismissing the panel hands focus back to the row rather than dropping it to the top of the page.
-- The trend chart carries the same figures as a visually hidden table, so the series is readable
-  rather than being an unlabelled graphic, and it can be stepped through with the arrow keys.
-- Filter chips are `aria-pressed` toggles, the result count is an `aria-live` region, and every
-  interactive element has a single visible focus treatment.
-- Motion is dropped entirely under `prefers-reduced-motion`.
-
-ESLint runs `jsx-a11y` over the source as part of CI.
 
 ## Notes on the data
 
