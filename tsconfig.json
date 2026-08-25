@@ -26,6 +26,6 @@
     },
     "types": ["jest", "@testing-library/jest-dom", "vite/client"]
   },
-  "include": ["src", "cypress", "vite.config.ts"],
+  "include": ["src", "cypress", "vite.config.ts", "jest.setup.ts"],
   "exclude": ["node_modules", "dist"]
 }
