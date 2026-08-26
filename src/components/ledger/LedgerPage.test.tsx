@@ -127,6 +127,13 @@ describe('LedgerPage', () => {
       expect(poundsIn(screen.getByTestId('ledger-outstanding').textContent)).toBeCloseTo(140, 2);
     });
 
+    it('names the row in each action, so the buttons are distinguishable', () => {
+      renderPage();
+      expect(
+        screen.getByRole('button', { name: /Mark £50\.00 from Jamie Whitfield as received/i }),
+      ).toBeInTheDocument();
+    });
+
     it('cannot settle something already settled', () => {
       renderPage();
       const row = screen.getByText('Ellie Dawson').closest('tr')!;

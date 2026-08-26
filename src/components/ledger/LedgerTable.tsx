@@ -139,6 +139,11 @@ export function LedgerTable({ views, direction, onAdd }: LedgerTableProps) {
                           }),
                         )
                       }
+                      aria-label={
+                        isReceivable
+                          ? `Mark ${formatCurrency(view.outstandingMinor)} from ${obligation.counterparty} as received`
+                          : `Mark ${formatCurrency(view.outstandingMinor)} to ${obligation.counterparty} as paid`
+                      }
                       data-testid="settle-obligation"
                     >
                       {isReceivable ? 'Mark received' : 'Mark paid'}
