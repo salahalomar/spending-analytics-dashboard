@@ -58,19 +58,36 @@
   color-scheme: light;
 }
 
-/* Category colours are shared by the chart, the legend and the row pills so
-   a category reads as the same colour everywhere in the UI. */
+/* Category colours are shared by the chart, the legend and the row pills so a
+   category reads as the same colour everywhere. Property names are the
+   slugified category label — see utils/categoryColor.ts. */
 :root {
+  /* Spending */
   --cat-groceries: #34d399;
-  --cat-restaurants: #fb923c;
+  --cat-rent-mortgage: #60a5fa;
+  --cat-utilities: #facc15;
   --cat-transport: #38bdf8;
+  --cat-eating-out: #fb923c;
   --cat-shopping: #a78bfa;
   --cat-entertainment: #f472b6;
-  --cat-utilities: #facc15;
-  --cat-health: #2dd4bf;
-  --cat-travel: #60a5fa;
+  --cat-health-fitness: #2dd4bf;
   --cat-subscriptions: #c084fc;
-  --cat-transfers: #94a3b8;
+  --cat-insurance: #94a3b8;
+  --cat-travel: #818cf8;
+  --cat-debt-repayments: #fb7185;
+  --cat-other-spending: #a1a1aa;
+
+  /* Income */
+  --cat-salary: #22c55e;
+  --cat-freelance: #14b8a6;
+  --cat-bonus: #84cc16;
+  --cat-interest-dividends: #06b6d4;
+  --cat-refunds: #4ade80;
+  --cat-gifts: #f0abfc;
+  --cat-other-income: #67e8f9;
+
+  /* Used when a category has no colour of its own. */
+  --cat-fallback: #7c8aa5;
 
   --radius-sm: 6px;
   --radius: 10px;
