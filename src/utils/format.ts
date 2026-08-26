@@ -66,6 +66,14 @@ export function formatPercent(ratio: number): string {
   return percentFormatter.format(ratio);
 }
 
+/** `+£120.00` / `-£45.00` — used wherever a net figure can go either way. */
+export function formatSignedCurrency(amountMinor: number): string {
+  const formatted = currencyFormatter.format(Math.abs(amountMinor) / 100);
+  if (amountMinor > 0) return `+${formatted}`;
+  if (amountMinor < 0) return `-${formatted}`;
+  return formatted;
+}
+
 /** Signed variant used by the trend indicator on the summary cards. */
 export function formatSignedPercent(ratio: number): string {
   if (!Number.isFinite(ratio)) return '—';

@@ -1,5 +1,5 @@
-import { CATEGORIES, PAYMENT_METHODS } from '@/types/transaction';
-import { CATEGORY_PROFILES } from '@/data/merchants';
+import { CATEGORIES, PAYMENT_METHODS, directionOfCategory } from '@/types/transaction';
+import { CATEGORY_PROFILES } from '@/data/counterparties';
 import {
   DATASET_END_DATE,
   DATASET_SPAN_DAYS,
@@ -57,12 +57,30 @@ describe('generateTransactions', () => {
     }
   });
 
-  it('only uses known categories, merchants and payment methods', () => {
+  it('only uses known categories, counterparties and payment methods', () => {
     for (const transaction of transactions) {
       expect(CATEGORIES).toContain(transaction.category);
       expect(PAYMENT_METHODS).toContain(transaction.paymentMethod);
-      expect(CATEGORY_PROFILES[transaction.category].merchants).toContain(transaction.merchant);
+      expect(CATEGORY_PROFILES[transaction.category].counterparties).toContain(
+        transaction.counterparty,
+      );
     }
+  });
+
+  it('keeps the category on the same side of the ledger as the direction', () => {
+    for (const transaction of transactions) {
+      expect(directionOfCategory(transaction.category)).toBe(transaction.direction);
+    }
+  });
+
+  it('produces both money in and money out', () => {
+    const income = transactions.filter((transaction) => transaction.direction === 'income');
+    expect(income.length).toBeGreaterThan(0);
+    expect(income.length).toBeLessThan(transactions.length);
+  });
+
+  it('marks generated rows as not user-entered', () => {
+    expect(transactions.every((transaction) => transaction.userEntered === false)).toBe(true);
   });
 
   it('keeps amounts positive, integral and within the category profile', () => {
@@ -83,7 +101,7 @@ describe('generateTransactions', () => {
   });
 
   it('covers every category across a large enough sample', () => {
-    const seen = new Set(transactions.map((transaction) => transaction.category));
+    const seen = new Set(generateTransactions({ count: 20_000, seed: 4 }).map((t) => t.category));
     expect(seen.size).toBe(CATEGORIES.length);
   });
 

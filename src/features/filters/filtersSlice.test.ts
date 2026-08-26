@@ -7,7 +7,8 @@ import reducer, {
   filtersReset,
   initialState,
   maxAmountChanged,
-  merchantQueryChanged,
+  counterpartyQueryChanged,
+  directionChanged,
   minAmountChanged,
   sortChanged,
   statusToggled,
@@ -16,7 +17,7 @@ import reducer, {
 describe('filtersSlice', () => {
   it('starts with the full dataset range and no narrowing', () => {
     const state = reducer(undefined, { type: '@@INIT' });
-    expect(state.merchantQuery).toBe('');
+    expect(state.counterpartyQuery).toBe('');
     expect(state.categories).toEqual([]);
     expect(state.dateFrom).toBe('2024-01-01');
     expect(state.dateTo).toBe('2025-12-31');
@@ -24,8 +25,22 @@ describe('filtersSlice', () => {
     expect(state.sortDirection).toBe('desc');
   });
 
-  it('stores the merchant query verbatim', () => {
-    expect(reducer(initialState, merchantQueryChanged('  Tesco ')).merchantQuery).toBe('  Tesco ');
+  it('stores the search query verbatim', () => {
+    expect(reducer(initialState, counterpartyQueryChanged('  Tesco ')).counterpartyQuery).toBe(
+      '  Tesco ',
+    );
+  });
+
+  describe('direction', () => {
+    it('switches which side of the ledger is shown', () => {
+      expect(reducer(initialState, directionChanged('income')).direction).toBe('income');
+    });
+
+    it('clears the categories, which belong to one side only', () => {
+      const withCategory = reducer(initialState, categoryToggled('Groceries'));
+      const switched = reducer(withCategory, directionChanged('income'));
+      expect(switched.categories).toEqual([]);
+    });
   });
 
   describe('categories', () => {
@@ -41,9 +56,9 @@ describe('filtersSlice', () => {
     it('keeps unrelated categories when toggling one off', () => {
       let state = reducer(initialState, categoryToggled('Groceries'));
       state = reducer(state, categoryToggled('Travel'));
-      state = reducer(state, categoryToggled('Health'));
+      state = reducer(state, categoryToggled('Insurance'));
       state = reducer(state, categoryToggled('Travel'));
-      expect(state.categories).toEqual(['Groceries', 'Health']);
+      expect(state.categories).toEqual(['Groceries', 'Insurance']);
     });
 
     it('clears every selection', () => {
@@ -124,17 +139,17 @@ describe('filtersSlice', () => {
       });
     });
 
-    it('defaults merchant to ascending, since A–Z is the useful order', () => {
-      expect(reducer(initialState, sortChanged('merchant'))).toMatchObject({
-        sortField: 'merchant',
+    it('defaults name to ascending, since A–Z is the useful order', () => {
+      expect(reducer(initialState, sortChanged('counterparty'))).toMatchObject({
+        sortField: 'counterparty',
         sortDirection: 'asc',
       });
     });
   });
 
   it('returns to the initial state on reset', () => {
-    let state = reducer(initialState, merchantQueryChanged('tesco'));
-    state = reducer(state, categoryToggled('Travel'));
+    let state = reducer(initialState, counterpartyQueryChanged('tesco'));
+    state = reducer(state, categoryToggled('Insurance'));
     state = reducer(state, minAmountChanged('25'));
     state = reducer(state, datePresetApplied('30d'));
 

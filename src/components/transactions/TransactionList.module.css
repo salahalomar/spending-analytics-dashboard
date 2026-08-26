@@ -218,6 +218,25 @@
   white-space: nowrap;
 }
 
+/* Money in reads green; money out keeps the default text colour so a list of
+   spending does not turn into a wall of red. */
+.amountIn {
+  color: var(--positive);
+}
+
+.ownBadge {
+  margin-left: 6px;
+  padding: 1px 5px;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  color: var(--accent-text);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
 .footer {
   padding: 8px 16px;
   border-top: 1px solid var(--border);

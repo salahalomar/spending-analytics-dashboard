@@ -4,6 +4,10 @@
   height: 100%;
 }
 
+.tooltip {
+  min-width: 152px;
+}
+
 .svg {
   display: block;
   width: 100%;
@@ -28,12 +32,51 @@
   font-size: 10px;
 }
 
-.line {
+.incomeLine,
+.expenseLine {
   fill: none;
-  stroke: var(--accent);
   stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
+}
+
+.incomeLine {
+  stroke: var(--positive);
+}
+
+.expenseLine {
+  stroke: var(--negative);
+}
+
+.legend {
+  position: absolute;
+  top: -26px;
+  right: 0;
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legendSwatch {
+  width: 9px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legendIncome {
+  background: var(--positive);
+}
+
+.legendExpense {
+  background: var(--negative);
 }
 
 .guide {
@@ -43,8 +86,15 @@
 
 .marker {
   fill: var(--bg-elevated);
-  stroke: var(--accent);
   stroke-width: 2.5;
+}
+
+.markerIncome {
+  stroke: var(--positive);
+}
+
+.markerExpense {
+  stroke: var(--negative);
 }
 
 .hitArea {
@@ -71,18 +121,35 @@
   color: var(--text-muted);
 }
 
-.tooltipValue {
-  display: block;
-  margin-top: 2px;
-  font-size: 14px;
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tooltipRow strong {
+  margin-left: auto;
+  color: var(--text);
   font-weight: 600;
 }
 
-.tooltipCount {
-  display: block;
-  margin-top: 1px;
-  font-size: 11px;
-  color: var(--text-faint);
+.tooltipNet {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tooltipNet strong {
+  margin-left: auto;
+  color: var(--text);
+  font-weight: 600;
 }
 
 .empty {

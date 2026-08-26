@@ -24,10 +24,18 @@
 .value {
   display: block;
   margin-top: 6px;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;
+}
+
+.positive {
+  color: var(--positive);
+}
+
+.negative {
+  color: var(--negative);
 }
 
 .meta {

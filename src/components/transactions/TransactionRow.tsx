@@ -17,9 +17,9 @@ interface TransactionRowProps {
   onSelect: (id: string) => void;
 }
 
-/** First letter of the merchant, used for the coloured avatar. */
-function initialOf(merchant: string): string {
-  return merchant.charAt(0).toUpperCase();
+/** First letter of the counterparty, used for the coloured avatar. */
+function initialOf(counterparty: string): string {
+  return counterparty.charAt(0).toUpperCase();
 }
 
 /**
@@ -36,6 +36,7 @@ function TransactionRowComponent({
   onSelect,
 }: TransactionRowProps) {
   const color = categoryColorVar(transaction.category);
+  const isIncome = transaction.direction === 'income';
 
   return (
     <div
@@ -53,13 +54,21 @@ function TransactionRowComponent({
         aria-controls={TRANSACTION_DETAIL_ID}
         data-testid="transaction-row"
         data-transaction-id={transaction.id}
+        data-direction={transaction.direction}
       >
         <span className={styles.merchantCell}>
           <span className={styles.avatar} style={{ background: color }} aria-hidden="true">
-            {initialOf(transaction.merchant)}
+            {initialOf(transaction.counterparty)}
           </span>
           <span className={styles.merchantText}>
-            <span className={styles.merchantName}>{transaction.merchant}</span>
+            <span className={styles.merchantName}>
+              {transaction.counterparty}
+              {transaction.userEntered ? (
+                <span className={styles.ownBadge} title="You added this">
+                  yours
+                </span>
+              ) : null}
+            </span>
             <span className={styles.merchantSub}>{transaction.description}</span>
           </span>
         </span>
@@ -84,8 +93,13 @@ function TransactionRowComponent({
           {transaction.status}
         </span>
 
-        <span className={`${styles.amountCell} numeric`}>
+        <span
+          className={`${styles.amountCell} ${isIncome ? styles.amountIn : ''} numeric`}
+          data-testid="transaction-amount"
+        >
+          {isIncome ? '+' : '−'}
           {formatCurrency(transaction.amountMinor)}
+          <span className="sr-only">{isIncome ? ' received' : ' spent'}</span>
         </span>
       </button>
     </div>

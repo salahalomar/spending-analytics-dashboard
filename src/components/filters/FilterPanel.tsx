@@ -1,22 +1,23 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { filtersReset } from '@/features/filters/filtersSlice';
 import {
-  selectAllTransactions,
   selectHasActiveFilters,
+  selectTotalCount,
   selectVisibleCount,
 } from '@/features/transactions/selectors';
 import { formatCount } from '@/utils/format';
 import { AmountFilter } from './AmountFilter';
 import { CategoryFilter } from './CategoryFilter';
 import { DateRangeFilter } from './DateRangeFilter';
-import { MerchantSearch } from './MerchantSearch';
+import { CounterpartySearch } from './CounterpartySearch';
+import { DirectionFilter } from './DirectionFilter';
 import { StatusFilter } from './StatusFilter';
 import styles from './FilterPanel.module.css';
 
 export function FilterPanel() {
   const dispatch = useAppDispatch();
   const visibleCount = useAppSelector(selectVisibleCount);
-  const totalCount = useAppSelector(selectAllTransactions).length;
+  const totalCount = useAppSelector(selectTotalCount);
   const hasActiveFilters = useAppSelector(selectHasActiveFilters);
 
   return (
@@ -33,7 +34,8 @@ export function FilterPanel() {
         </button>
       </div>
 
-      <MerchantSearch />
+      <DirectionFilter />
+      <CounterpartySearch />
       <CategoryFilter />
       <StatusFilter />
       <DateRangeFilter />

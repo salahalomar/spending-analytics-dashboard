@@ -1,11 +1,13 @@
 import {
-  CATEGORIES,
+  EXPENSE_CATEGORIES,
+  INCOME_CATEGORIES,
   PAYMENT_METHODS,
   type Category,
   type Transaction,
+  type TransactionDirection,
   type TransactionStatus,
 } from '@/types/transaction';
-import { CATEGORY_PROFILES, DESCRIPTION_TEMPLATES } from '@/data/merchants';
+import { CATEGORY_PROFILES, DESCRIPTION_TEMPLATES } from '@/data/counterparties';
 import { gaussian, mulberry32, pick, pickWeighted, type Rng } from '@/data/random';
 
 export const DEFAULT_SEED = 20240517;
@@ -14,9 +16,16 @@ export const DEFAULT_TRANSACTION_COUNT = 50_000;
 export const DATASET_END_DATE = new Date('2025-12-31T23:59:59.000Z');
 export const DATASET_SPAN_DAYS = 730;
 
+/** Roughly one in nine rows is money coming in. */
+const INCOME_SHARE = 0.11;
+
 const MS_PER_DAY = 86_400_000;
 
-const CATEGORY_WEIGHTS: readonly (readonly [Category, number])[] = CATEGORIES.map(
+const EXPENSE_WEIGHTS: readonly (readonly [Category, number])[] = EXPENSE_CATEGORIES.map(
+  (category) => [category, CATEGORY_PROFILES[category].weight] as const,
+);
+
+const INCOME_WEIGHTS: readonly (readonly [Category, number])[] = INCOME_CATEGORIES.map(
   (category) => [category, CATEGORY_PROFILES[category].weight] as const,
 );
 
@@ -43,16 +52,25 @@ function inflationMultiplier(progress: number): number {
   return 0.88 + progress * 0.24;
 }
 
-function drawAmountMinor(rng: Rng, category: Category, date: Date, progress: number): number {
+function drawAmountMinor(
+  rng: Rng,
+  category: Category,
+  direction: TransactionDirection,
+  date: Date,
+  progress: number,
+): number {
   const profile = CATEGORY_PROFILES[category];
+
+  // Income arrives on a schedule and does not swing with weekends or payday.
   const multiplier =
-    dayOfMonthMultiplier(date.getUTCDate()) *
-    weekendMultiplier(date.getUTCDay()) *
-    inflationMultiplier(progress);
+    direction === 'income'
+      ? inflationMultiplier(progress)
+      : dayOfMonthMultiplier(date.getUTCDate()) *
+        weekendMultiplier(date.getUTCDay()) *
+        inflationMultiplier(progress);
 
   const raw = gaussian(rng, profile.mean, profile.stdDev) * multiplier;
-  const clamped = Math.min(Math.max(Math.abs(raw), profile.min), profile.max);
-  return Math.round(clamped);
+  return Math.round(Math.min(Math.max(Math.abs(raw), profile.min), profile.max));
 }
 
 function drawStatus(rng: Rng): TransactionStatus {
@@ -70,9 +88,9 @@ export interface GenerateOptions {
 }
 
 /**
- * Builds the synthetic dataset. Pure and deterministic for a given seed: the
- * same options always yield an identical array, which is what lets the unit
- * tests assert on concrete aggregates.
+ * Builds the sample dataset. Pure and deterministic for a given seed: the same
+ * options always yield an identical array, which is what lets the unit tests
+ * assert on concrete aggregates.
  *
  * Results come back sorted newest-first, so the default view needs no sort.
  */
@@ -97,20 +115,23 @@ export function generateTransactions(options: GenerateOptions = {}): Transaction
     const timestamp = Math.floor(startMs + progress * spanMs);
     const date = new Date(timestamp);
 
-    const category = pickWeighted(rng, CATEGORY_WEIGHTS);
-    const merchant = pick(rng, CATEGORY_PROFILES[category].merchants);
+    const direction: TransactionDirection = rng() < INCOME_SHARE ? 'income' : 'expense';
+    const category = pickWeighted(rng, direction === 'income' ? INCOME_WEIGHTS : EXPENSE_WEIGHTS);
+    const counterparty = pick(rng, CATEGORY_PROFILES[category].counterparties);
 
     transactions[i] = {
       id: `txn_${i.toString().padStart(6, '0')}`,
       date: date.toISOString(),
       timestamp,
-      merchant,
+      direction,
+      counterparty,
       category,
-      amountMinor: drawAmountMinor(rng, category, date, progress),
+      amountMinor: drawAmountMinor(rng, category, direction, date, progress),
       currency: 'GBP',
       paymentMethod: pick(rng, PAYMENT_METHODS),
       status: drawStatus(rng),
-      description: `${pick(rng, DESCRIPTION_TEMPLATES)} · ${merchant}`,
+      description: `${pick(rng, DESCRIPTION_TEMPLATES)} · ${counterparty}`,
+      userEntered: false,
     };
   }
 

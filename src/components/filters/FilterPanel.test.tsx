@@ -10,7 +10,7 @@ function renderPanel() {
     preloadedState: {
       transactions: {
         ...transactionsInitialState,
-        items: makeTransactionSet(),
+        sample: makeTransactionSet(),
         status: 'succeeded',
       },
     },
@@ -18,22 +18,22 @@ function renderPanel() {
 }
 
 describe('FilterPanel', () => {
-  describe('merchant search', () => {
+  describe('counterparty search', () => {
     it('keeps typing local until the debounce elapses', async () => {
       jest.useFakeTimers();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const { store } = renderPanel();
 
-      await user.type(screen.getByTestId('merchant-search'), 'tesco');
+      await user.type(screen.getByTestId('counterparty-search'), 'tesco');
 
       // Every keystroke is on screen, but the store has not been touched yet.
-      expect(screen.getByTestId('merchant-search')).toHaveValue('tesco');
-      expect(store.getState().filters.merchantQuery).toBe('');
+      expect(screen.getByTestId('counterparty-search')).toHaveValue('tesco');
+      expect(store.getState().filters.counterpartyQuery).toBe('');
 
       act(() => {
         jest.advanceTimersByTime(250);
       });
-      expect(store.getState().filters.merchantQuery).toBe('tesco');
+      expect(store.getState().filters.counterpartyQuery).toBe('tesco');
 
       jest.useRealTimers();
     });
@@ -44,7 +44,7 @@ describe('FilterPanel', () => {
       const { store } = renderPanel();
       const dispatch = jest.spyOn(store, 'dispatch');
 
-      await user.type(screen.getByTestId('merchant-search'), 'tesco');
+      await user.type(screen.getByTestId('counterparty-search'), 'tesco');
       act(() => {
         jest.advanceTimersByTime(250);
       });
@@ -54,7 +54,7 @@ describe('FilterPanel', () => {
           typeof action === 'object' &&
           action !== null &&
           'type' in action &&
-          action.type === 'filters/merchantQueryChanged',
+          action.type === 'filters/counterpartyQueryChanged',
       );
       expect(searchDispatches).toHaveLength(1);
 
@@ -65,23 +65,23 @@ describe('FilterPanel', () => {
       const user = userEvent.setup();
       const { store } = renderPanel();
 
-      await user.type(screen.getByTestId('merchant-search'), 'tesco');
-      await waitFor(() => expect(store.getState().filters.merchantQuery).toBe('tesco'));
+      await user.type(screen.getByTestId('counterparty-search'), 'tesco');
+      await waitFor(() => expect(store.getState().filters.counterpartyQuery).toBe('tesco'));
 
-      await user.click(screen.getByTestId('clear-merchant-search'));
-      expect(screen.getByTestId('merchant-search')).toHaveValue('');
-      await waitFor(() => expect(store.getState().filters.merchantQuery).toBe(''));
+      await user.click(screen.getByTestId('clear-search'));
+      expect(screen.getByTestId('counterparty-search')).toHaveValue('');
+      await waitFor(() => expect(store.getState().filters.counterpartyQuery).toBe(''));
     });
 
     it('picks up an external reset', async () => {
       const user = userEvent.setup();
       const { store } = renderPanel();
 
-      await user.type(screen.getByTestId('merchant-search'), 'tesco');
-      await waitFor(() => expect(store.getState().filters.merchantQuery).toBe('tesco'));
+      await user.type(screen.getByTestId('counterparty-search'), 'tesco');
+      await waitFor(() => expect(store.getState().filters.counterpartyQuery).toBe('tesco'));
 
       await user.click(screen.getByTestId('reset-filters'));
-      await waitFor(() => expect(screen.getByTestId('merchant-search')).toHaveValue(''));
+      await waitFor(() => expect(screen.getByTestId('counterparty-search')).toHaveValue(''));
     });
   });
 
@@ -140,7 +140,7 @@ describe('FilterPanel', () => {
       // The fixture set has a single pending transaction.
       await user.click(screen.getByTestId('status-chip-pending'));
       await waitFor(() =>
-        expect(screen.getByTestId('result-count')).toHaveTextContent('1 of 5 transactions'),
+        expect(screen.getByTestId('result-count')).toHaveTextContent('1 of 6 transactions'),
       );
     });
   });
@@ -179,11 +179,11 @@ describe('FilterPanel', () => {
     const user = userEvent.setup();
     renderPanel();
 
-    expect(screen.getByTestId('result-count')).toHaveTextContent('5 of 5 transactions');
+    expect(screen.getByTestId('result-count')).toHaveTextContent('6 of 6 transactions');
 
     await user.click(screen.getByTestId('category-chip-Groceries'));
     await waitFor(() =>
-      expect(screen.getByTestId('result-count')).toHaveTextContent('2 of 5 transactions'),
+      expect(screen.getByTestId('result-count')).toHaveTextContent('2 of 6 transactions'),
     );
   });
 });

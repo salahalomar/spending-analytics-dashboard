@@ -1,12 +1,17 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { categoriesCleared, categoryToggled } from '@/features/filters/filtersSlice';
-import { CATEGORIES } from '@/types/transaction';
+import { CATEGORIES, categoriesFor } from '@/types/transaction';
 import { categoryColorVar } from '@/utils/categoryColor';
 import styles from './FilterPanel.module.css';
 
 export function CategoryFilter() {
   const dispatch = useAppDispatch();
   const selected = useAppSelector((state) => state.filters.categories);
+  const direction = useAppSelector((state) => state.filters.direction);
+
+  // Showing income categories while filtered to spending would offer chips
+  // that can only ever produce an empty list.
+  const categories = direction === 'all' ? CATEGORIES : categoriesFor(direction);
 
   return (
     <div className={styles.group}>
@@ -26,7 +31,7 @@ export function CategoryFilter() {
       </div>
 
       <div className={styles.chips} role="group" aria-labelledby="category-filter-label">
-        {CATEGORIES.map((category) => {
+        {categories.map((category) => {
           const isSelected = selected.includes(category);
           return (
             <button

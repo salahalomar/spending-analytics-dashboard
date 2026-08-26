@@ -10,7 +10,7 @@ function renderCards(filters = {}) {
     preloadedState: {
       transactions: {
         ...transactionsInitialState,
-        items: makeTransactionSet(),
+        sample: makeTransactionSet(),
         status: 'succeeded',
       },
       filters: { ...filtersInitialState, ...filters },
@@ -24,17 +24,17 @@ describe('SummaryCards', () => {
   it('shows the headline figures for the current selection', () => {
     renderCards();
 
-    expect(digits(screen.getByTestId('summary-total').textContent)).toBe('280.99');
-    expect(screen.getByTestId('summary-count')).toHaveTextContent('5');
-    expect(digits(screen.getByTestId('summary-average').textContent)).toBe('56.20');
+    expect(digits(screen.getByTestId('summary-income').textContent)).toBe('2,500.00');
+    expect(digits(screen.getByTestId('summary-expense').textContent)).toBe('280.99');
+    expect(digits(screen.getByTestId('summary-net').textContent)).toBe('+2,219.01');
     expect(screen.getByTestId('summary-top-category')).toHaveTextContent('Groceries');
   });
 
   it('recalculates when a filter narrows the selection', () => {
     renderCards({ categories: ['Groceries'] });
 
-    expect(digits(screen.getByTestId('summary-total').textContent)).toBe('125.00');
-    expect(screen.getByTestId('summary-count')).toHaveTextContent('2');
+    expect(digits(screen.getByTestId('summary-expense').textContent)).toBe('125.00');
+    expect(digits(screen.getByTestId('summary-net').textContent)).toBe('-125.00');
   });
 
   it('shows a trend against the preceding period when one exists', () => {
@@ -50,10 +50,10 @@ describe('SummaryCards', () => {
   });
 
   it('degrades gracefully when nothing matches', () => {
-    renderCards({ merchantQuery: 'no-such-merchant' });
+    renderCards({ counterpartyQuery: 'no-such-name' });
 
-    expect(digits(screen.getByTestId('summary-total').textContent)).toBe('0.00');
-    expect(screen.getByTestId('summary-count')).toHaveTextContent('0');
+    expect(digits(screen.getByTestId('summary-expense').textContent)).toBe('0.00');
+    expect(digits(screen.getByTestId('summary-income').textContent)).toBe('0.00');
     expect(screen.getByTestId('summary-top-category')).toHaveTextContent('—');
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { merchantQueryChanged } from '@/features/filters/filtersSlice';
+import { counterpartyQueryChanged } from '@/features/filters/filtersSlice';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import styles from './FilterPanel.module.css';
 
@@ -11,9 +11,9 @@ const DEBOUNCE_MS = 200;
  * the store, so a keystroke costs a single input re-render rather than a
  * re-filter of the whole dataset.
  */
-export function MerchantSearch() {
+export function CounterpartySearch() {
   const dispatch = useAppDispatch();
-  const storeQuery = useAppSelector((state) => state.filters.merchantQuery);
+  const storeQuery = useAppSelector((state) => state.filters.counterpartyQuery);
 
   const [draft, setDraft] = useState(storeQuery);
   const debouncedDraft = useDebouncedValue(draft, DEBOUNCE_MS);
@@ -22,7 +22,7 @@ export function MerchantSearch() {
   useEffect(() => {
     if (debouncedDraft === lastSynced.current) return;
     lastSynced.current = debouncedDraft;
-    dispatch(merchantQueryChanged(debouncedDraft));
+    dispatch(counterpartyQueryChanged(debouncedDraft));
   }, [debouncedDraft, dispatch]);
 
   // Pull external changes — "Reset filters", for instance — back into the box.
@@ -35,8 +35,8 @@ export function MerchantSearch() {
 
   return (
     <div className={styles.group}>
-      <label className={styles.groupLabel} htmlFor="merchant-search">
-        Merchant
+      <label className={styles.groupLabel} htmlFor="counterparty-search">
+        Who
       </label>
       <div className={styles.searchWrap}>
         <svg
@@ -53,22 +53,22 @@ export function MerchantSearch() {
           <path d="m20 20-3.6-3.6" strokeLinecap="round" />
         </svg>
         <input
-          id="merchant-search"
+          id="counterparty-search"
           type="search"
           className={`${styles.input} ${styles.searchInput}`}
-          placeholder="Search merchants…"
+          placeholder="Search by name…"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           autoComplete="off"
-          data-testid="merchant-search"
+          data-testid="counterparty-search"
         />
         {draft !== '' ? (
           <button
             type="button"
             className={styles.clearSearch}
             onClick={() => setDraft('')}
-            aria-label="Clear merchant search"
-            data-testid="clear-merchant-search"
+            aria-label="Clear search"
+            data-testid="clear-search"
           >
             <svg
               width="12"

@@ -15,9 +15,13 @@ export const DATE_PRESETS = [
 
 export type DatePresetId = (typeof DATE_PRESETS)[number]['id'];
 
+/** Which side of the ledger the transaction list is showing. */
+export type DirectionFilter = 'all' | 'income' | 'expense';
+
 export interface FiltersState {
-  /** Raw text from the merchant search box; matching is case-insensitive. */
-  merchantQuery: string;
+  direction: DirectionFilter;
+  /** Raw text from the search box; matching is case-insensitive. */
+  counterpartyQuery: string;
   /** Empty means "every category" rather than "no categories". */
   categories: Category[];
   statuses: TransactionStatus[];
@@ -31,7 +35,8 @@ export interface FiltersState {
 }
 
 export const initialState: FiltersState = {
-  merchantQuery: '',
+  direction: 'all',
+  counterpartyQuery: '',
   categories: [],
   statuses: [],
   dateFrom: datasetRange.start,
@@ -46,8 +51,14 @@ const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: {
-    merchantQueryChanged(state, action: PayloadAction<string>) {
-      state.merchantQuery = action.payload;
+    directionChanged(state, action: PayloadAction<DirectionFilter>) {
+      state.direction = action.payload;
+      // Categories belong to one side of the ledger, so a selection made
+      // under "all" would silently exclude everything after switching.
+      state.categories = [];
+    },
+    counterpartyQueryChanged(state, action: PayloadAction<string>) {
+      state.counterpartyQuery = action.payload;
     },
     /** Adds the category if absent, removes it if already selected. */
     categoryToggled(state, action: PayloadAction<Category>) {
@@ -109,7 +120,7 @@ const filtersSlice = createSlice({
         state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
       } else {
         state.sortField = action.payload;
-        state.sortDirection = action.payload === 'merchant' ? 'asc' : 'desc';
+        state.sortDirection = action.payload === 'counterparty' ? 'asc' : 'desc';
       }
     },
     filtersReset() {
@@ -119,7 +130,8 @@ const filtersSlice = createSlice({
 });
 
 export const {
-  merchantQueryChanged,
+  directionChanged,
+  counterpartyQueryChanged,
   categoryToggled,
   categoriesCleared,
   statusToggled,

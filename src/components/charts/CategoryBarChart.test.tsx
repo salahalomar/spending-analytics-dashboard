@@ -11,7 +11,7 @@ function renderChart(filters = {}) {
     preloadedState: {
       transactions: {
         ...transactionsInitialState,
-        items: makeTransactionSet(),
+        sample: makeTransactionSet(),
         status: 'succeeded',
       },
       filters: { ...filtersInitialState, ...filters },
@@ -57,7 +57,7 @@ describe('CategoryBarChart', () => {
   });
 
   it('says so when the selection is empty', () => {
-    renderChart({ merchantQuery: 'no-such-merchant' });
+    renderChart({ counterpartyQuery: 'no-such-merchant' });
     expect(screen.getByText(/no spend in this selection/i)).toBeInTheDocument();
   });
 });

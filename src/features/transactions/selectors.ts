@@ -1,16 +1,21 @@
 import { createSelector } from '@reduxjs/toolkit';
 import type { RootState } from '@/app/store';
-import type { Category, Transaction } from '@/types/transaction';
-import { CATEGORIES } from '@/types/transaction';
+import type { Category, Transaction, TransactionDirection } from '@/types/transaction';
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/types/transaction';
 import { endOfDayMs, startOfDayMs, toMonthKey } from '@/utils/date';
 
-export const selectAllTransactions = (state: RootState): Transaction[] => state.transactions.items;
+const selectSample = (state: RootState) => state.transactions.sample;
+const selectUserEntered = (state: RootState) => state.transactions.userEntered;
+export const selectShowSample = (state: RootState) => state.transactions.showSample;
+
 export const selectTransactionsStatus = (state: RootState) => state.transactions.status;
 export const selectTransactionsError = (state: RootState) => state.transactions.error;
 export const selectGeneratedInMs = (state: RootState) => state.transactions.generatedInMs;
+export const selectUserEnteredCount = (state: RootState) => state.transactions.userEntered.length;
 export const selectFilters = (state: RootState) => state.filters;
 
-const selectMerchantQuery = (state: RootState) => state.filters.merchantQuery;
+const selectDirectionFilter = (state: RootState) => state.filters.direction;
+const selectCounterpartyQuery = (state: RootState) => state.filters.counterpartyQuery;
 const selectSelectedCategories = (state: RootState) => state.filters.categories;
 const selectSelectedStatuses = (state: RootState) => state.filters.statuses;
 const selectDateFrom = (state: RootState) => state.filters.dateFrom;
@@ -29,34 +34,74 @@ export function parseAmountToMinor(value: string): number | null {
 }
 
 /**
- * The distinct merchant names present in the dataset — roughly 70 of them,
- * regardless of how many transactions there are.
+ * The user's own records combined with the sample data.
+ *
+ * Both inputs are already sorted newest-first, so this is a linear merge
+ * rather than a concatenate-and-sort — which matters when the sample side
+ * holds 50,000 rows.
  */
-export const selectDistinctMerchants = createSelector([selectAllTransactions], (transactions) => {
-  const seen = new Set<string>();
-  for (const transaction of transactions) {
-    seen.add(transaction.merchant);
-  }
-  return Array.from(seen).sort((a, b) => a.localeCompare(b));
-});
+export const selectAllTransactions = createSelector(
+  [selectSample, selectUserEntered, selectShowSample],
+  (sample, userEntered, showSample): Transaction[] => {
+    if (!showSample) return userEntered;
+    if (userEntered.length === 0) return sample;
+
+    const merged: Transaction[] = new Array<Transaction>(sample.length + userEntered.length);
+    let sampleIndex = 0;
+    let userIndex = 0;
+
+    for (let i = 0; i < merged.length; i += 1) {
+      const nextSample = sample[sampleIndex];
+      const nextUser = userEntered[userIndex];
+
+      if (nextSample === undefined) {
+        merged[i] = nextUser!;
+        userIndex += 1;
+      } else if (nextUser === undefined || nextSample.timestamp >= nextUser.timestamp) {
+        merged[i] = nextSample;
+        sampleIndex += 1;
+      } else {
+        merged[i] = nextUser;
+        userIndex += 1;
+      }
+    }
+
+    return merged;
+  },
+);
 
 /**
- * Resolves the search box to the set of merchant names it matches.
- *
- * Matching against ~70 distinct names once and then testing set membership is
- * dramatically cheaper than lower-casing and substring-scanning 50,000 strings
- * on every keystroke. `null` means "no query", i.e. match everything.
+ * The distinct counterparties present — a few dozen names, regardless of how
+ * many transactions there are.
  */
-export const selectMatchingMerchants = createSelector(
-  [selectDistinctMerchants, selectMerchantQuery],
-  (merchants, query): Set<string> | null => {
+export const selectDistinctCounterparties = createSelector(
+  [selectAllTransactions],
+  (transactions) => {
+    const seen = new Set<string>();
+    for (const transaction of transactions) {
+      seen.add(transaction.counterparty);
+    }
+    return Array.from(seen).sort((a, b) => a.localeCompare(b));
+  },
+);
+
+/**
+ * Resolves the search box to the set of counterparty names it matches.
+ *
+ * Matching against a few dozen distinct names once and then testing set
+ * membership is dramatically cheaper than lower-casing and substring-scanning
+ * 50,000 strings on every keystroke. `null` means "no query", i.e. match all.
+ */
+export const selectMatchingCounterparties = createSelector(
+  [selectDistinctCounterparties, selectCounterpartyQuery],
+  (counterparties, query): Set<string> | null => {
     const needle = query.trim().toLowerCase();
     if (needle === '') return null;
 
     const matches = new Set<string>();
-    for (const merchant of merchants) {
-      if (merchant.toLowerCase().includes(needle)) {
-        matches.add(merchant);
+    for (const counterparty of counterparties) {
+      if (counterparty.toLowerCase().includes(needle)) {
+        matches.add(counterparty);
       }
     }
     return matches;
@@ -83,22 +128,24 @@ const selectDateBounds = createSelector([selectDateFrom, selectDateTo], (from, t
 }));
 
 /**
- * Everything except the date range. The summary card needs this to compare the
+ * Everything except the date range. The summary needs this to compare the
  * selected window against the period immediately before it, and keeping it as
- * its own memoised step means moving a date slider does not re-run the
- * merchant, category and amount predicates.
+ * its own memoised step means moving a date does not re-run the counterparty,
+ * category and amount predicates.
  */
 export const selectFilteredIgnoringDate = createSelector(
   [
     selectAllTransactions,
-    selectMatchingMerchants,
+    selectDirectionFilter,
+    selectMatchingCounterparties,
     selectCategorySet,
     selectStatusSet,
     selectAmountBounds,
   ],
-  (transactions, merchants, categories, statuses, { minMinor, maxMinor }) => {
+  (transactions, direction, counterparties, categories, statuses, { minMinor, maxMinor }) => {
     const noFiltersActive =
-      merchants === null &&
+      direction === 'all' &&
+      counterparties === null &&
       categories === null &&
       statuses === null &&
       minMinor === null &&
@@ -107,7 +154,8 @@ export const selectFilteredIgnoringDate = createSelector(
 
     const result: Transaction[] = [];
     for (const transaction of transactions) {
-      if (merchants !== null && !merchants.has(transaction.merchant)) continue;
+      if (direction !== 'all' && transaction.direction !== direction) continue;
+      if (counterparties !== null && !counterparties.has(transaction.counterparty)) continue;
       if (categories !== null && !categories.has(transaction.category)) continue;
       if (statuses !== null && !statuses.has(transaction.status)) continue;
       if (minMinor !== null && transaction.amountMinor < minMinor) continue;
@@ -121,7 +169,7 @@ export const selectFilteredIgnoringDate = createSelector(
 /** The fully filtered set, still in the source order (date descending). */
 export const selectFilteredTransactions = createSelector(
   [selectFilteredIgnoringDate, selectDateBounds],
-  (transactions, { fromMs, toMs }) => {
+  (transactions: Transaction[], { fromMs, toMs }): Transaction[] => {
     if (fromMs === null && toMs === null) return transactions;
 
     const result: Transaction[] = [];
@@ -137,13 +185,13 @@ export const selectFilteredTransactions = createSelector(
 /**
  * The array the list actually renders.
  *
- * The generator emits transactions newest-first and every filter preserves
- * that order, so the default sort is a no-op and we can hand back the same
- * reference instead of copying and sorting 50,000 rows.
+ * Transactions arrive newest-first and every filter preserves that order, so
+ * the default sort is a no-op and we can hand back the same reference instead
+ * of copying and sorting 50,000 rows.
  */
 export const selectVisibleTransactions = createSelector(
   [selectFilteredTransactions, selectSortField, selectSortDirection],
-  (transactions, field, direction) => {
+  (transactions: Transaction[], field, direction): Transaction[] => {
     if (field === 'date' && direction === 'desc') return transactions;
 
     const sign = direction === 'asc' ? 1 : -1;
@@ -153,8 +201,8 @@ export const selectVisibleTransactions = createSelector(
       switch (field) {
         case 'amount':
           return sign * (a.amountMinor - b.amountMinor);
-        case 'merchant': {
-          const byName = a.merchant.localeCompare(b.merchant);
+        case 'counterparty': {
+          const byName = a.counterparty.localeCompare(b.counterparty);
           return sign * (byName !== 0 ? byName : a.timestamp - b.timestamp);
         }
         case 'date':
@@ -172,15 +220,23 @@ export const selectVisibleCount = createSelector(
   (transactions) => transactions.length,
 );
 
-export interface SpendSummary {
-  totalMinor: number;
+export const selectTotalCount = createSelector(
+  [selectAllTransactions],
+  (transactions) => transactions.length,
+);
+
+export interface CashSummary {
+  incomeMinor: number;
+  expenseMinor: number;
+  /** Income minus spending; negative means more went out than came in. */
+  netMinor: number;
   count: number;
-  averageMinor: number;
-  largestMinor: number;
+  averageExpenseMinor: number;
+  largestExpenseMinor: number;
   topCategory: Category | null;
   topCategoryMinor: number;
-  /** Change vs the preceding window of equal length; null when incomparable. */
-  changeRatio: number | null;
+  /** Change in spending vs the preceding window; null when incomparable. */
+  spendChangeRatio: number | null;
 }
 
 /**
@@ -189,14 +245,24 @@ export interface SpendSummary {
  */
 export const selectSummary = createSelector(
   [selectFilteredTransactions, selectFilteredIgnoringDate, selectDateBounds],
-  (visible, ignoringDate, { fromMs, toMs }): SpendSummary => {
-    let totalMinor = 0;
-    let largestMinor = 0;
+  (visible, ignoringDate, { fromMs, toMs }): CashSummary => {
+    let incomeMinor = 0;
+    let expenseMinor = 0;
+    let expenseCount = 0;
+    let largestExpenseMinor = 0;
     const byCategory = new Map<Category, number>();
 
     for (const transaction of visible) {
-      totalMinor += transaction.amountMinor;
-      if (transaction.amountMinor > largestMinor) largestMinor = transaction.amountMinor;
+      if (transaction.direction === 'income') {
+        incomeMinor += transaction.amountMinor;
+        continue;
+      }
+
+      expenseMinor += transaction.amountMinor;
+      expenseCount += 1;
+      if (transaction.amountMinor > largestExpenseMinor) {
+        largestExpenseMinor = transaction.amountMinor;
+      }
       byCategory.set(
         transaction.category,
         (byCategory.get(transaction.category) ?? 0) + transaction.amountMinor,
@@ -212,32 +278,38 @@ export const selectSummary = createSelector(
       }
     }
 
-    let changeRatio: number | null = null;
+    let spendChangeRatio: number | null = null;
     if (fromMs !== null && toMs !== null) {
       const windowMs = toMs - fromMs;
       const previousFrom = fromMs - windowMs - 1;
       const previousTo = fromMs - 1;
 
-      let previousTotal = 0;
+      let previousSpend = 0;
       for (const transaction of ignoringDate) {
-        if (transaction.timestamp >= previousFrom && transaction.timestamp <= previousTo) {
-          previousTotal += transaction.amountMinor;
+        if (
+          transaction.direction === 'expense' &&
+          transaction.timestamp >= previousFrom &&
+          transaction.timestamp <= previousTo
+        ) {
+          previousSpend += transaction.amountMinor;
         }
       }
 
-      if (previousTotal > 0) {
-        changeRatio = (totalMinor - previousTotal) / previousTotal;
+      if (previousSpend > 0) {
+        spendChangeRatio = (expenseMinor - previousSpend) / previousSpend;
       }
     }
 
     return {
-      totalMinor,
+      incomeMinor,
+      expenseMinor,
+      netMinor: incomeMinor - expenseMinor,
       count: visible.length,
-      averageMinor: visible.length === 0 ? 0 : Math.round(totalMinor / visible.length),
-      largestMinor,
+      averageExpenseMinor: expenseCount === 0 ? 0 : Math.round(expenseMinor / expenseCount),
+      largestExpenseMinor,
       topCategory,
       topCategoryMinor,
-      changeRatio,
+      spendChangeRatio,
     };
   },
 );
@@ -246,76 +318,99 @@ export interface CategoryDatum {
   category: Category;
   totalMinor: number;
   count: number;
-  /** Share of total spend in the current selection, as a 0–1 ratio. */
+  /** Share of the direction's total in the current selection, as a 0–1 ratio. */
   share: number;
 }
 
-/** Spend per category, largest first. Categories with no spend are dropped. */
-export const selectSpendByCategory = createSelector(
-  [selectFilteredTransactions],
-  (transactions): CategoryDatum[] => {
-    const totals = new Map<Category, { totalMinor: number; count: number }>();
-    let grandTotal = 0;
+function aggregateByCategory(
+  transactions: readonly Transaction[],
+  direction: TransactionDirection,
+  order: readonly Category[],
+): CategoryDatum[] {
+  const totals = new Map<Category, { totalMinor: number; count: number }>();
+  let grandTotal = 0;
 
-    for (const transaction of transactions) {
-      const entry = totals.get(transaction.category);
-      if (entry) {
-        entry.totalMinor += transaction.amountMinor;
-        entry.count += 1;
-      } else {
-        totals.set(transaction.category, { totalMinor: transaction.amountMinor, count: 1 });
-      }
-      grandTotal += transaction.amountMinor;
+  for (const transaction of transactions) {
+    if (transaction.direction !== direction) continue;
+
+    const entry = totals.get(transaction.category);
+    if (entry) {
+      entry.totalMinor += transaction.amountMinor;
+      entry.count += 1;
+    } else {
+      totals.set(transaction.category, { totalMinor: transaction.amountMinor, count: 1 });
     }
+    grandTotal += transaction.amountMinor;
+  }
 
-    return CATEGORIES.filter((category) => totals.has(category))
-      .map((category) => {
-        const entry = totals.get(category)!;
-        return {
-          category,
-          totalMinor: entry.totalMinor,
-          count: entry.count,
-          share: grandTotal === 0 ? 0 : entry.totalMinor / grandTotal,
-        };
-      })
-      .sort((a, b) => b.totalMinor - a.totalMinor);
-  },
+  return order
+    .filter((category) => totals.has(category))
+    .map((category) => {
+      const entry = totals.get(category)!;
+      return {
+        category,
+        totalMinor: entry.totalMinor,
+        count: entry.count,
+        share: grandTotal === 0 ? 0 : entry.totalMinor / grandTotal,
+      };
+    })
+    .sort((a, b) => b.totalMinor - a.totalMinor);
+}
+
+/** Spending per category, largest first. Categories with no spend are dropped. */
+export const selectSpendByCategory = createSelector([selectFilteredTransactions], (transactions) =>
+  aggregateByCategory(transactions, 'expense', EXPENSE_CATEGORIES),
+);
+
+/** Income per category, largest first. */
+export const selectIncomeByCategory = createSelector([selectFilteredTransactions], (transactions) =>
+  aggregateByCategory(transactions, 'income', INCOME_CATEGORIES),
 );
 
 export interface MonthlyDatum {
   /** `YYYY-MM`. */
   month: string;
-  totalMinor: number;
+  incomeMinor: number;
+  expenseMinor: number;
+  netMinor: number;
   count: number;
 }
 
-/** Spend per calendar month, oldest first, for the trend chart. */
-export const selectSpendByMonth = createSelector(
+/** Money in and out per calendar month, oldest first, for the trend chart. */
+export const selectCashFlowByMonth = createSelector(
   [selectFilteredTransactions],
   (transactions): MonthlyDatum[] => {
-    const totals = new Map<string, { totalMinor: number; count: number }>();
+    const totals = new Map<string, { incomeMinor: number; expenseMinor: number; count: number }>();
 
     for (const transaction of transactions) {
       const month = toMonthKey(transaction.timestamp);
-      const entry = totals.get(month);
-      if (entry) {
-        entry.totalMinor += transaction.amountMinor;
-        entry.count += 1;
-      } else {
-        totals.set(month, { totalMinor: transaction.amountMinor, count: 1 });
+      let entry = totals.get(month);
+      if (!entry) {
+        entry = { incomeMinor: 0, expenseMinor: 0, count: 0 };
+        totals.set(month, entry);
       }
+
+      if (transaction.direction === 'income') {
+        entry.incomeMinor += transaction.amountMinor;
+      } else {
+        entry.expenseMinor += transaction.amountMinor;
+      }
+      entry.count += 1;
     }
 
-    return Array.from(totals, ([month, entry]) => ({ month, ...entry })).sort((a, b) =>
-      a.month.localeCompare(b.month),
-    );
+    return Array.from(totals, ([month, entry]) => ({
+      month,
+      ...entry,
+      netMinor: entry.incomeMinor - entry.expenseMinor,
+    })).sort((a, b) => a.month.localeCompare(b.month));
   },
 );
 
 /** True when the user has narrowed the dataset in any way. */
 export const selectHasActiveFilters = createSelector([selectFilters], (filters) => {
   return (
-    filters.merchantQuery.trim() !== '' ||
+    filters.direction !== 'all' ||
+    filters.counterpartyQuery.trim() !== '' ||
     filters.categories.length > 0 ||
     filters.statuses.length > 0 ||
     filters.minAmount !== '' ||

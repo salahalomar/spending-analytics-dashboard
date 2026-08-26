@@ -1,30 +1,44 @@
 import { useAppSelector } from '@/app/hooks';
 import { selectSummary } from '@/features/transactions/selectors';
-import { formatCurrency, formatCount, formatPercent, formatSignedPercent } from '@/utils/format';
-import { categoryColorVar } from '@/utils/categoryColor';
+import { formatCurrency, formatCount, formatSignedCurrency, formatSignedPercent } from '@/utils/format';
 import styles from './SummaryCards.module.css';
 
+/**
+ * The four figures worth seeing first: what came in, what went out, whether
+ * you are up or down, and where the money went.
+ */
 export function SummaryCards() {
   const summary = useAppSelector(selectSummary);
-  const { changeRatio } = summary;
+  const { spendChangeRatio, netMinor } = summary;
+  const isPositive = netMinor >= 0;
 
   return (
     <div className={styles.grid} data-testid="summary-cards">
       <article className={styles.card}>
-        <span className={styles.label}>Total spend</span>
-        <span className={`${styles.value} numeric`} data-testid="summary-total">
-          {formatCurrency(summary.totalMinor)}
+        <span className={styles.label}>Money in</span>
+        <span className={`${styles.value} ${styles.positive} numeric`} data-testid="summary-income">
+          {formatCurrency(summary.incomeMinor)}
         </span>
         <div className={styles.meta}>
-          {changeRatio === null ? (
+          <span>across the selected period</span>
+        </div>
+      </article>
+
+      <article className={styles.card}>
+        <span className={styles.label}>Money out</span>
+        <span className={`${styles.value} ${styles.negative} numeric`} data-testid="summary-expense">
+          {formatCurrency(summary.expenseMinor)}
+        </span>
+        <div className={styles.meta}>
+          {spendChangeRatio === null ? (
             <span>No comparable prior period</span>
           ) : (
             <>
               <span
-                className={`${styles.trend} ${changeRatio > 0 ? styles.up : styles.down}`}
+                className={`${styles.trend} ${spendChangeRatio > 0 ? styles.up : styles.down}`}
                 data-testid="summary-trend"
               >
-                {changeRatio > 0 ? '▲' : '▼'} {formatSignedPercent(changeRatio)}
+                {spendChangeRatio > 0 ? '▲' : '▼'} {formatSignedPercent(spendChangeRatio)}
               </span>
               <span>vs previous period</span>
             </>
@@ -33,45 +47,28 @@ export function SummaryCards() {
       </article>
 
       <article className={styles.card}>
-        <span className={styles.label}>Transactions</span>
-        <span className={`${styles.value} numeric`} data-testid="summary-count">
-          {formatCount(summary.count)}
+        <span className={styles.label}>Net position</span>
+        <span
+          className={`${styles.value} ${isPositive ? styles.positive : styles.negative} numeric`}
+          data-testid="summary-net"
+        >
+          {formatSignedCurrency(netMinor)}
         </span>
         <div className={styles.meta}>
-          <span>in the current selection</span>
+          <span>{isPositive ? 'more came in than went out' : 'more went out than came in'}</span>
         </div>
       </article>
 
       <article className={styles.card}>
-        <span className={styles.label}>Average</span>
-        <span className={`${styles.value} numeric`} data-testid="summary-average">
-          {formatCurrency(summary.averageMinor)}
-        </span>
-        <div className={styles.meta}>
-          <span>largest {formatCurrency(summary.largestMinor)}</span>
-        </div>
-      </article>
-
-      <article className={styles.card}>
-        <span className={styles.label}>Top category</span>
+        <span className={styles.label}>Biggest cost</span>
         <span className={styles.value} data-testid="summary-top-category">
           {summary.topCategory ?? '—'}
         </span>
         <div className={styles.meta}>
           {summary.topCategory ? (
-            <>
-              <span
-                className={styles.swatch}
-                style={{ background: categoryColorVar(summary.topCategory) }}
-                aria-hidden="true"
-              />
-              <span>
-                {formatCurrency(summary.topCategoryMinor)} ·{' '}
-                {formatPercent(
-                  summary.totalMinor === 0 ? 0 : summary.topCategoryMinor / summary.totalMinor,
-                )}
-              </span>
-            </>
+            <span>
+              {formatCurrency(summary.topCategoryMinor)} · {formatCount(summary.count)} transactions
+            </span>
           ) : (
             <span>Nothing to show</span>
           )}
