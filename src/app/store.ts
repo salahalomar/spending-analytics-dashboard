@@ -7,9 +7,11 @@ import {
 import transactionsReducer from '@/features/transactions/transactionsSlice';
 import filtersReducer from '@/features/filters/filtersSlice';
 import uiReducer from '@/features/ui/uiSlice';
+import ledgerReducer from '@/features/ledger/ledgerSlice';
 
 export const rootReducer = combineReducers({
   transactions: transactionsReducer,
+  ledger: ledgerReducer,
   filters: filtersReducer,
   ui: uiReducer,
 });

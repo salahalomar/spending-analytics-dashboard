@@ -1,0 +1,17 @@
+.page {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  min-height: 0;
+  height: 100%;
+}
+
+@media (max-width: 1180px) {
+  .page {
+    grid-template-rows: none;
+  }
+
+  .page > :last-child {
+    height: 70vh;
+  }
+}

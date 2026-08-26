@@ -12,8 +12,8 @@ export function Header() {
 
   const subtitle =
     total === 0
-      ? 'Generating dataset…'
-      : `${formatCount(total)} transactions${generatedInMs === null ? '' : ` · generated in ${generatedInMs}ms`}`;
+      ? 'Loading your data…'
+      : `${formatCount(total)} transactions${generatedInMs === null ? '' : ` · loaded in ${generatedInMs}ms`}`;
 
   return (
     <header className={styles.header}>
@@ -34,7 +34,7 @@ export function Header() {
           </svg>
         </span>
         <div className={styles.titles}>
-          <h1 className={styles.title}>Spending Analytics</h1>
+          <h1 className={styles.title}>Personal Finance</h1>
           <p className={styles.subtitle} data-testid="dataset-summary">
             {subtitle}
           </p>
