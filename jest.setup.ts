@@ -1,4 +1,24 @@
 import '@testing-library/jest-dom';
+import { deserialize, serialize } from 'node:v8';
+import { TextDecoder, TextEncoder } from 'node:util';
+
+// jsdom omits the encoding globals that React Router reaches for at import
+// time. Node's implementations are the same ones the browser exposes.
+if (typeof globalThis.TextEncoder === 'undefined') {
+  globalThis.TextEncoder = TextEncoder as unknown as typeof globalThis.TextEncoder;
+}
+if (typeof globalThis.TextDecoder === 'undefined') {
+  globalThis.TextDecoder = TextDecoder as unknown as typeof globalThis.TextDecoder;
+}
+
+// jsdom also omits structuredClone, which IndexedDB uses to copy values on
+// insertion. Without it every write throws and the record store quietly falls
+// back to memory, so the persistence tests would pass while testing nothing.
+// V8's serialiser is a faithful structured clone for the shapes stored here.
+if (typeof globalThis.structuredClone === 'undefined') {
+  globalThis.structuredClone = (<T,>(value: T): T =>
+    deserialize(serialize(value)) as T) as typeof globalThis.structuredClone;
+}
 
 // jsdom does not implement layout, so every element reports a zero-sized box.
 // The virtualiser and the charts both measure their container, so give them a
