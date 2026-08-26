@@ -2,6 +2,7 @@ import { CATEGORIES, PAYMENT_METHODS, directionOfCategory } from '@/types/transa
 import { CATEGORY_PROFILES } from '@/data/counterparties';
 import {
   DATASET_END_DATE,
+  STRESS_TRANSACTION_COUNT,
   DATASET_SPAN_DAYS,
   generateTransactions,
   getDatasetDateRange,
@@ -10,10 +11,10 @@ import {
 const MS_PER_DAY = 86_400_000;
 
 describe('generateTransactions', () => {
-  const transactions = generateTransactions({ count: 2000, seed: 1 });
+  const transactions = generateTransactions({ count: 2400, seed: 1 });
 
   it('generates exactly the requested number of transactions', () => {
-    expect(transactions).toHaveLength(2000);
+    expect(transactions).toHaveLength(2400);
     expect(generateTransactions({ count: 0 })).toHaveLength(0);
   });
 
@@ -105,10 +106,40 @@ describe('generateTransactions', () => {
     expect(seen.size).toBe(CATEGORIES.length);
   });
 
-  it('builds 50,000 transactions in a reasonable time', () => {
+  it('builds the stress dataset in a reasonable time', () => {
     const startedAt = Date.now();
-    expect(generateTransactions()).toHaveLength(50_000);
+    expect(generateTransactions({ count: STRESS_TRANSACTION_COUNT })).toHaveLength(50_000);
     expect(Date.now() - startedAt).toBeLessThan(5000);
+  });
+
+  it('includes one salary payment a month rather than scattering them', () => {
+    const salary = transactions.filter((transaction) => transaction.category === 'Salary');
+    expect(salary).toHaveLength(24);
+
+    const months = new Set(salary.map((transaction) => transaction.date.slice(0, 7)));
+    expect(months.size).toBe(24);
+  });
+
+  it('pays the rent once a month', () => {
+    const rent = transactions.filter((t) => t.category === 'Rent & Mortgage');
+    const months = new Set(rent.map((transaction) => transaction.date.slice(0, 7)));
+    expect(rent).toHaveLength(months.size);
+  });
+
+  it('produces a plausible monthly balance for one person', () => {
+    const total = (direction: 'income' | 'expense') =>
+      transactions
+        .filter((transaction) => transaction.direction === direction)
+        .reduce((sum, transaction) => sum + transaction.amountMinor, 0) / 100;
+
+    const monthlyIn = total('income') / 24;
+    const monthlyOut = total('expense') / 24;
+
+    expect(monthlyIn).toBeGreaterThan(2000);
+    expect(monthlyIn).toBeLessThan(8000);
+    // Living within roughly 30% either side of your income.
+    expect(monthlyOut / monthlyIn).toBeGreaterThan(0.7);
+    expect(monthlyOut / monthlyIn).toBeLessThan(1.3);
   });
 });
 

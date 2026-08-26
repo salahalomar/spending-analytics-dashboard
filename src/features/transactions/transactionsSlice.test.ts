@@ -85,7 +85,11 @@ describe('transactionsSlice', () => {
       const sample = makeTransactionSet();
       const state = reducer(
         initialState,
-        loadTransactions.fulfilled({ sample, userEntered: [], generatedInMs: 42 }, 'req', undefined),
+        loadTransactions.fulfilled(
+          { sample, userEntered: [], generatedInMs: 42, count: sample.length },
+          'req',
+          undefined,
+        ),
       );
       expect(state.status).toBe('succeeded');
       expect(state.sample).toHaveLength(sample.length);

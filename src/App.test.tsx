@@ -167,6 +167,7 @@ describe('App', () => {
           sample: [],
           userEntered: [],
           showSample: true,
+          sampleSize: 0,
           status: 'failed',
           error: 'generator exploded',
           generatedInMs: null,

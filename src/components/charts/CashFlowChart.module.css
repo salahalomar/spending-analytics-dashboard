@@ -1,5 +1,7 @@
 .wrapper {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
 }
@@ -9,9 +11,11 @@
 }
 
 .svg {
+  order: 1;
   display: block;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 100%;
   overflow: visible;
 }
 
@@ -49,11 +53,11 @@
 }
 
 .legend {
-  position: absolute;
-  top: -26px;
-  right: 0;
+  order: 2;
   display: flex;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
+  padding-top: 6px;
   font-size: 11px;
   color: var(--text-muted);
 }
@@ -158,4 +162,13 @@
   height: 100%;
   font-size: 13px;
   color: var(--text-muted);
+}
+
+/* The measured plot area, excluding the legend row below it. */
+.plot {
+  order: 1;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
 }

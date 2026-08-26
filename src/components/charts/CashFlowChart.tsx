@@ -89,7 +89,7 @@ export function CashFlowChart() {
   };
 
   return (
-    <div className={styles.wrapper} ref={wrapperRef} data-testid="cash-flow-chart">
+    <div className={styles.wrapper} data-testid="cash-flow-chart">
       <div className={styles.legend}>
         <span className={styles.legendItem}>
           <span className={`${styles.legendSwatch} ${styles.legendIncome}`} aria-hidden="true" />
@@ -101,6 +101,7 @@ export function CashFlowChart() {
         </span>
       </div>
 
+      <div className={styles.plot} ref={wrapperRef}>
       {width > 0 && height > 0 ? (
         <svg
           className={styles.svg}
@@ -172,6 +173,7 @@ export function CashFlowChart() {
           </g>
         </svg>
       ) : null}
+      </div>
 
       {activeDatum && activeX !== null ? (
         <div

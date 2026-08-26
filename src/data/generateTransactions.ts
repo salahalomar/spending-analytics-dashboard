@@ -3,6 +3,7 @@ import {
   INCOME_CATEGORIES,
   PAYMENT_METHODS,
   type Category,
+  type ExpenseCategory,
   type Transaction,
   type TransactionDirection,
   type TransactionStatus,
@@ -11,23 +12,52 @@ import { CATEGORY_PROFILES, DESCRIPTION_TEMPLATES } from '@/data/counterparties'
 import { gaussian, mulberry32, pick, pickWeighted, type Rng } from '@/data/random';
 
 export const DEFAULT_SEED = 20240517;
-export const DEFAULT_TRANSACTION_COUNT = 50_000;
+/**
+ * A believable two years for one person: a few card payments most days.
+ * `STRESS_TRANSACTION_COUNT` exists to exercise the virtualised list at a
+ * scale no real person reaches.
+ */
+export const DEFAULT_TRANSACTION_COUNT = 2400;
+export const STRESS_TRANSACTION_COUNT = 50_000;
 /** Transactions are spread across the two years leading up to this date. */
 export const DATASET_END_DATE = new Date('2025-12-31T23:59:59.000Z');
 export const DATASET_SPAN_DAYS = 730;
 
-/** Roughly one in nine rows is money coming in. */
-const INCOME_SHARE = 0.11;
+/**
+ * Roughly one row in twenty-five is money coming in, on top of the salary
+ * that is paid in separately once a month.
+ */
+const INCOME_SHARE = 0.04;
 
 const MS_PER_DAY = 86_400_000;
 
-const EXPENSE_WEIGHTS: readonly (readonly [Category, number])[] = EXPENSE_CATEGORIES.map(
-  (category) => [category, CATEGORY_PROFILES[category].weight] as const,
-);
+/**
+ * Bills that arrive on a schedule, with how many land each month.
+ *
+ * Drawing these from the same random pool as everyday spending produced three
+ * rent payments in one month and none the next, which made the totals
+ * nonsense — rent alone was outweighing every other category combined.
+ */
+const RECURRING: readonly { category: ExpenseCategory; perMonth: number; dayOfMonth: number }[] = [
+  { category: 'Rent & Mortgage', perMonth: 1, dayOfMonth: 1 },
+  { category: 'Utilities', perMonth: 2, dayOfMonth: 8 },
+  { category: 'Subscriptions', perMonth: 4, dayOfMonth: 14 },
+  { category: 'Insurance', perMonth: 1, dayOfMonth: 18 },
+  { category: 'Debt Repayments', perMonth: 1, dayOfMonth: 28 },
+];
 
-const INCOME_WEIGHTS: readonly (readonly [Category, number])[] = INCOME_CATEGORIES.map(
-  (category) => [category, CATEGORY_PROFILES[category].weight] as const,
-);
+const RECURRING_CATEGORIES = new Set<Category>(RECURRING.map((entry) => entry.category));
+
+// Everyday spending only; the scheduled categories are generated separately.
+const EXPENSE_WEIGHTS: readonly (readonly [Category, number])[] = EXPENSE_CATEGORIES.filter(
+  (category) => !RECURRING_CATEGORIES.has(category),
+).map((category) => [category, CATEGORY_PROFILES[category].weight] as const);
+
+// Salary is generated on a schedule rather than drawn at random, so it is
+// excluded from the weighted pool.
+const INCOME_WEIGHTS: readonly (readonly [Category, number])[] = INCOME_CATEGORIES.filter(
+  (category) => category !== 'Salary',
+).map((category) => [category, CATEGORY_PROFILES[category].weight] as const);
 
 /**
  * Weekend and payday effects. Spend is higher at weekends and in the days
@@ -80,6 +110,113 @@ function drawStatus(rng: Rng): TransactionStatus {
   return 'reverted';
 }
 
+/** Day of the month salary lands. */
+const PAYDAY = 25;
+
+/**
+ * One salary payment a month, on payday, rising slightly over time.
+ *
+ * Drawing salary from the same random pool as everything else produced a dozen
+ * pay packets some months and none in others, which made the income line
+ * meaningless. Real income is mostly scheduled, so this is too.
+ */
+function generateSalary(rng: Rng, startMs: number, endMs: number): Transaction[] {
+  const profile = CATEGORY_PROFILES.Salary;
+  const salaries: Transaction[] = [];
+
+  const cursor = new Date(startMs);
+  cursor.setUTCDate(PAYDAY);
+  cursor.setUTCHours(6, 0, 0, 0);
+
+  // A single base salary with small monthly variation, rather than an
+  // independent draw each month, which would swing wildly.
+  const base = Math.round(gaussian(rng, profile.mean, profile.stdDev * 0.35));
+
+  let index = 0;
+  while (cursor.getTime() <= endMs) {
+    const timestamp = cursor.getTime();
+    if (timestamp >= startMs) {
+      const progress = (timestamp - startMs) / (endMs - startMs);
+      const amountMinor = Math.round(
+        Math.min(Math.max(base * (0.99 + rng() * 0.02) * (1 + progress * 0.06), profile.min), profile.max),
+      );
+
+      salaries.push({
+        id: `txn_salary_${index.toString().padStart(3, '0')}`,
+        date: new Date(timestamp).toISOString(),
+        timestamp,
+        direction: 'income',
+        counterparty: 'Monthly Salary',
+        category: 'Salary',
+        amountMinor,
+        currency: 'GBP',
+        paymentMethod: 'Bank Transfer',
+        status: 'completed',
+        description: 'Salary · Monthly Salary',
+        userEntered: false,
+      });
+      index += 1;
+    }
+
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+
+  return salaries;
+}
+
+/** Monthly bills across the whole span, each on its usual day. */
+function generateRecurring(rng: Rng, startMs: number, endMs: number): Transaction[] {
+  const rows: Transaction[] = [];
+  let index = 0;
+
+  for (const entry of RECURRING) {
+    const profile = CATEGORY_PROFILES[entry.category];
+    // One baseline per bill, so the amount is steady month to month rather
+    // than redrawn from scratch each time.
+    const base = Math.abs(gaussian(rng, profile.mean, profile.stdDev * 0.4));
+
+    const cursor = new Date(startMs);
+    cursor.setUTCDate(entry.dayOfMonth);
+    cursor.setUTCHours(9, 0, 0, 0);
+
+    while (cursor.getTime() <= endMs) {
+      for (let occurrence = 0; occurrence < entry.perMonth; occurrence += 1) {
+        const timestamp = cursor.getTime() + occurrence * 86_400_000;
+        if (timestamp < startMs || timestamp > endMs) continue;
+
+        const progress = (timestamp - startMs) / (endMs - startMs);
+        const counterparty = pick(rng, profile.counterparties);
+        const amountMinor = Math.round(
+          Math.min(
+            Math.max(base * (0.94 + rng() * 0.12) * inflationMultiplier(progress), profile.min),
+            profile.max,
+          ),
+        );
+
+        rows.push({
+          id: `txn_recurring_${index.toString().padStart(5, '0')}`,
+          date: new Date(timestamp).toISOString(),
+          timestamp,
+          direction: 'expense',
+          counterparty,
+          category: entry.category,
+          amountMinor,
+          currency: 'GBP',
+          paymentMethod: 'Direct Debit',
+          status: 'completed',
+          description: `Direct debit · ${counterparty}`,
+          userEntered: false,
+        });
+        index += 1;
+      }
+
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+  }
+
+  return rows;
+}
+
 export interface GenerateOptions {
   count?: number;
   seed?: number;
@@ -107,9 +244,16 @@ export function generateTransactions(options: GenerateOptions = {}): Transaction
   const startMs = endMs - spanDays * MS_PER_DAY;
   const spanMs = endMs - startMs;
 
-  const transactions: Transaction[] = new Array<Transaction>(count);
+  // Scheduled rows are generated first and the remainder is filled with
+  // everyday spending, so `count` means the total rather than "the total, plus
+  // however many bills happened to fall in the range".
+  const salaries = generateSalary(rng, startMs, endMs);
+  const recurring = generateRecurring(rng, startMs, endMs);
+  const everydayCount = Math.max(0, count - salaries.length - recurring.length);
 
-  for (let i = 0; i < count; i += 1) {
+  const transactions: Transaction[] = new Array<Transaction>(everydayCount);
+
+  for (let i = 0; i < everydayCount; i += 1) {
     // Bias timestamps slightly towards the recent end of the range.
     const progress = Math.pow(rng(), 0.85);
     const timestamp = Math.floor(startMs + progress * spanMs);
@@ -135,11 +279,15 @@ export function generateTransactions(options: GenerateOptions = {}): Transaction
     };
   }
 
+  transactions.push(...salaries, ...recurring);
+
   // Sorting once here means the reducer can store the canonical order and the
   // default (date, descending) view costs nothing at render time.
   transactions.sort((a, b) => b.timestamp - a.timestamp);
 
-  return transactions;
+  // A count smaller than the scheduled rows alone can still overshoot; drop
+  // the oldest so the caller always gets the length it asked for.
+  return transactions.length > count ? transactions.slice(0, count) : transactions;
 }
 
 /** Inclusive bounds of the generated dataset, used to seed the date pickers. */

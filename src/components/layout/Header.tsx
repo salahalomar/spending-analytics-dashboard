@@ -1,5 +1,10 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { themeToggled } from '@/features/ui/uiSlice';
+import { loadTransactions } from '@/features/transactions/transactionsSlice';
+import {
+  DEFAULT_TRANSACTION_COUNT,
+  STRESS_TRANSACTION_COUNT,
+} from '@/data/generateTransactions';
 import { selectGeneratedInMs, selectAllTransactions } from '@/features/transactions/selectors';
 import { formatCount } from '@/utils/format';
 import styles from './Header.module.css';
@@ -9,6 +14,8 @@ export function Header() {
   const theme = useAppSelector((state) => state.ui.theme);
   const generatedInMs = useAppSelector(selectGeneratedInMs);
   const total = useAppSelector(selectAllTransactions).length;
+  const sampleSize = useAppSelector((state) => state.transactions.sampleSize);
+  const stressed = sampleSize >= STRESS_TRANSACTION_COUNT;
 
   const subtitle =
     total === 0
@@ -42,6 +49,23 @@ export function Header() {
       </div>
 
       <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.stressToggle}
+          onClick={() =>
+            void dispatch(
+              loadTransactions({
+                count: stressed ? DEFAULT_TRANSACTION_COUNT : STRESS_TRANSACTION_COUNT,
+              }),
+            )
+          }
+          aria-pressed={stressed}
+          title="The sample data is a realistic two years. Load 50,000 rows to see the virtualised list under load."
+          data-testid="stress-toggle"
+        >
+          {stressed ? 'Normal sample' : 'Load 50,000 rows'}
+        </button>
+
         <button
           type="button"
           className={styles.themeToggle}

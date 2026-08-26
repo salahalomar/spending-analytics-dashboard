@@ -82,3 +82,32 @@
     display: none;
   }
 }
+
+.stressToggle {
+  padding: 6px 11px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.stressToggle:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.stressToggle[aria-pressed='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+  font-weight: 500;
+}
+
+@media (max-width: 720px) {
+  .stressToggle {
+    display: none;
+  }
+}

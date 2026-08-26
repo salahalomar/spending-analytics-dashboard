@@ -13,7 +13,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 132px;
+  grid-template-columns: 124px minmax(0, 1fr) 128px;
   align-items: center;
   gap: 10px;
   /* Tight enough that all ten categories fit the card without scrolling at
@@ -87,6 +87,6 @@
 
 @media (max-width: 560px) {
   .row {
-    grid-template-columns: 78px minmax(0, 1fr) 112px;
+    grid-template-columns: 104px minmax(0, 1fr) 108px;
   }
 }

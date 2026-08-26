@@ -23,6 +23,8 @@ export interface TransactionsState {
   generatedInMs: number | null;
   /** Whether the sample data is mixed in with the user's own records. */
   showSample: boolean;
+  /** How many sample rows are currently loaded. */
+  sampleSize: number;
 }
 
 export const initialState: TransactionsState = {
@@ -32,6 +34,7 @@ export const initialState: TransactionsState = {
   error: null,
   generatedInMs: null,
   showSample: true,
+  sampleSize: DEFAULT_TRANSACTION_COUNT,
 };
 
 /** Fields the user supplies; everything else is derived. */
@@ -88,7 +91,7 @@ export interface LoadArgs {
  * the first paint.
  */
 export const loadTransactions = createAsyncThunk<
-  { sample: Transaction[]; userEntered: Transaction[]; generatedInMs: number },
+  { sample: Transaction[]; userEntered: Transaction[]; generatedInMs: number; count: number },
   LoadArgs | undefined
 >('transactions/load', async (args) => {
   const count = args?.count ?? DEFAULT_TRANSACTION_COUNT;
@@ -103,7 +106,7 @@ export const loadTransactions = createAsyncThunk<
   const saved = await store.getAll();
   saved.sort((a, b) => b.timestamp - a.timestamp);
 
-  return { sample, userEntered: saved, generatedInMs };
+  return { sample, userEntered: saved, generatedInMs, count };
 });
 
 export const addTransaction = createAsyncThunk<Transaction, TransactionDraft>(
@@ -159,6 +162,7 @@ const transactionsSlice = createSlice({
         state.sample = action.payload.sample;
         state.userEntered = action.payload.userEntered;
         state.generatedInMs = action.payload.generatedInMs;
+        state.sampleSize = action.payload.count;
       })
       .addCase(loadTransactions.rejected, (state, action) => {
         state.status = 'failed';
