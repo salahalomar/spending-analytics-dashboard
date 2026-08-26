@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useAppSelector } from '@/app/hooks';
+import { useNow } from '@/hooks/useNow';
 import {
   selectPayables,
   selectReceivables,
@@ -31,7 +32,7 @@ export function LedgerPage({ direction }: LedgerPageProps) {
 
   // Read the clock once per render rather than inside the pure helpers, so
   // every figure on the page is derived from the same instant.
-  const nowMs = Date.now();
+  const nowMs = useNow();
 
   const { views, summary } = useMemo(
     () => ({

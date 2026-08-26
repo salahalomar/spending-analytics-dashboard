@@ -135,16 +135,21 @@ function createIndexedDbStore<T extends Identified>(storeName: StoreName): Recor
 function createMemoryStore<T extends Identified>(): RecordStore<T> {
   const records = new Map<string, T>();
 
+  // Written as resolved promises rather than async functions: there is
+  // nothing to await, and the contract only requires a thenable.
   return {
-    getAll: async () => Array.from(records.values()),
-    put: async (record) => {
+    getAll: () => Promise.resolve(Array.from(records.values())),
+    put: (record) => {
       records.set(record.id, record);
+      return Promise.resolve();
     },
-    remove: async (id) => {
+    remove: (id) => {
       records.delete(id);
+      return Promise.resolve();
     },
-    clear: async () => {
+    clear: () => {
       records.clear();
+      return Promise.resolve();
     },
   };
 }

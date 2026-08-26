@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
+import { useNow } from '@/hooks/useNow';
 import { selectPayables, selectReceivables, summariseObligations } from '@/features/ledger/selectors';
 import styles from './Nav.module.css';
 
@@ -14,7 +15,7 @@ export function Nav() {
   const receivables = useAppSelector(selectReceivables);
   const payables = useAppSelector(selectPayables);
 
-  const nowMs = Date.now();
+  const nowMs = useNow();
   const owedOverdue = summariseObligations(receivables, nowMs).overdueCount;
   const owingOverdue = summariseObligations(payables, nowMs).overdueCount;
 

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
+import { useNow } from '@/hooks/useNow';
 import { selectSummary } from '@/features/transactions/selectors';
 import {
   groupByCounterparty,
@@ -24,7 +25,7 @@ export function OverviewPage() {
   const payables = useAppSelector(selectPayables);
 
   // One clock reading for the whole page, so every figure agrees.
-  const nowMs = Date.now();
+  const nowMs = useNow();
 
   const { position, topDebtors, topCreditors } = useMemo(
     () => ({

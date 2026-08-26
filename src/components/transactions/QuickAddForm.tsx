@@ -90,7 +90,11 @@ export function QuickAddForm() {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} data-testid="quick-add-form">
+    <form
+      className={styles.form}
+      onSubmit={(event) => void handleSubmit(event)}
+      data-testid="quick-add-form"
+    >
       <div className={styles.field}>
         <span className={styles.label} id="quick-add-direction">
           Type

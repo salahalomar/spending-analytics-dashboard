@@ -17,13 +17,13 @@ export function LedgerForm({ direction, onDone }: LedgerFormProps) {
   const dispatch = useAppDispatch();
   const isReceivable = direction === 'receivable';
 
-  const todayValue = toDateInputValue(Date.now());
   const [counterparty, setCounterparty] = useState('');
   const [kind, setKind] = useState<ObligationKind>(isReceivable ? 'person' : 'credit-card');
   const [reference, setReference] = useState('');
   const [amount, setAmount] = useState('');
-  const [issuedOn, setIssuedOn] = useState(todayValue);
-  const [dueOn, setDueOn] = useState(() => shiftDateInput(todayValue, 30));
+  // Lazy initialisers keep the clock out of the render body.
+  const [issuedOn, setIssuedOn] = useState(() => toDateInputValue(Date.now()));
+  const [dueOn, setDueOn] = useState(() => shiftDateInput(toDateInputValue(Date.now()), 30));
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -62,7 +62,11 @@ export function LedgerForm({ direction, onDone }: LedgerFormProps) {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} data-testid="ledger-form">
+    <form
+      className={styles.form}
+      onSubmit={(event) => void handleSubmit(event)}
+      data-testid="ledger-form"
+    >
       <div className={styles.field}>
         <label className={styles.label} htmlFor="ledger-counterparty">
           {isReceivable ? 'Who owes you' : 'Who you owe'}
