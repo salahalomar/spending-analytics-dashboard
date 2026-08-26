@@ -15,7 +15,7 @@ function makeLargeDataset(count: number): Transaction[] {
   return Array.from({ length: count }, (_, index) =>
     makeTransaction({
       id: `txn_${index}`,
-      merchant: index % 2 === 0 ? 'Tesco' : 'Uber',
+      counterparty: index % 2 === 0 ? 'Tesco' : 'Uber',
       category: index % 2 === 0 ? 'Groceries' : 'Transport',
       amountMinor: 1000 + index,
       date: new Date(base - index * dayMs * 0.02).toISOString(),
@@ -26,7 +26,7 @@ function makeLargeDataset(count: number): Transaction[] {
 function renderList(items: Transaction[], filters = {}) {
   return renderWithStore(<TransactionList />, {
     preloadedState: {
-      transactions: { ...transactionsInitialState, items, status: 'succeeded' },
+      transactions: { ...transactionsInitialState, sample: items, status: 'succeeded' },
       filters: { ...filtersInitialState, dateFrom: '', dateTo: '', ...filters },
     },
   });
@@ -105,12 +105,12 @@ describe('TransactionList', () => {
 
   it('offers a way out when the filters match nothing', async () => {
     const user = userEvent.setup();
-    const { store } = renderList(makeLargeDataset(50), { merchantQuery: 'no-such-merchant' });
+    const { store } = renderList(makeLargeDataset(50), { counterpartyQuery: 'no-such-merchant' });
 
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /reset filters/i }));
-    expect(store.getState().filters.merchantQuery).toBe('');
+    expect(store.getState().filters.counterpartyQuery).toBe('');
   });
 
   it('opens the detail panel for the row that was clicked', async () => {

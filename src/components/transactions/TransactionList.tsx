@@ -11,6 +11,7 @@ import { formatCount } from '@/utils/format';
 import type { SortField } from '@/types/transaction';
 import { EmptyState } from '@/components/common/EmptyState';
 import { SkeletonRows } from '@/components/common/Skeleton';
+import { QuickAddForm } from './QuickAddForm';
 import { TransactionDetail } from './TransactionDetail';
 import { TransactionRow } from './TransactionRow';
 import styles from './TransactionList.module.css';
@@ -21,7 +22,7 @@ const OVERSCAN = 8;
 const SORT_OPTIONS: readonly { field: SortField; label: string }[] = [
   { field: 'date', label: 'Date' },
   { field: 'amount', label: 'Amount' },
-  { field: 'merchant', label: 'Merchant' },
+  { field: 'counterparty', label: 'Name' },
 ];
 
 export function TransactionList() {
@@ -97,8 +98,10 @@ export function TransactionList() {
         </div>
       </div>
 
+      <QuickAddForm />
+
       <div className={styles.columns} aria-hidden="true">
-        <span>Merchant</span>
+        <span>Name</span>
         <span>Category</span>
         <span>Date</span>
         <span>Status</span>
@@ -112,7 +115,7 @@ export function TransactionList() {
       ) : transactions.length === 0 ? (
         <EmptyState
           title="No matching transactions"
-          message="No transactions match the current filters. Try widening the date range or clearing the merchant search."
+          message="Nothing matches the current filters. Try widening the date range or clearing the search."
           actionLabel="Reset filters"
           onAction={() => dispatch(filtersReset())}
         />

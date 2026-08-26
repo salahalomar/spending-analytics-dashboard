@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { transactionDeselected } from '@/features/ui/uiSlice';
+import { deleteTransaction } from '@/features/transactions/transactionsSlice';
 import { selectVisibleTransactions } from '@/features/transactions/selectors';
 import { formatDate, formatTime } from '@/utils/date';
 import { formatCurrency } from '@/utils/format';
@@ -41,8 +42,8 @@ export function TransactionDetail() {
     <div className={styles.wrapper}>
       <dl className={styles.panel} id={TRANSACTION_DETAIL_ID} data-testid="transaction-detail">
         <div className={styles.field}>
-          <dt>Merchant</dt>
-          <dd>{transaction.merchant}</dd>
+          <dt>{transaction.direction === 'income' ? 'From' : 'Paid to'}</dt>
+          <dd>{transaction.counterparty}</dd>
         </div>
         <div className={styles.field}>
           <dt>Amount</dt>
@@ -67,9 +68,31 @@ export function TransactionDetail() {
           <dd>{transaction.status}</dd>
         </div>
         <div className={styles.field}>
+          <dt>Note</dt>
+          <dd>{transaction.description || '—'}</dd>
+        </div>
+        <div className={styles.field}>
           <dt>Reference</dt>
           <dd className="numeric">{transaction.id}</dd>
         </div>
+        {transaction.userEntered ? (
+          <div className={styles.field}>
+            <dt>Actions</dt>
+            <dd>
+              <button
+                type="button"
+                className={styles.delete}
+                onClick={() => {
+                  void dispatch(deleteTransaction(transaction.id));
+                  dispatch(transactionDeselected());
+                }}
+                data-testid="delete-transaction"
+              >
+                Delete
+              </button>
+            </dd>
+          </div>
+        ) : null}
       </dl>
       <button
         type="button"

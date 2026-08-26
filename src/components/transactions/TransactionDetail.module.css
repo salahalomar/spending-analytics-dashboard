@@ -55,3 +55,16 @@
 .wrapper {
   position: relative;
 }
+
+.delete {
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--negative) 45%, transparent);
+  border-radius: var(--radius-sm);
+  color: var(--negative);
+  font-size: 12px;
+}
+
+.delete:hover {
+  background: color-mix(in srgb, var(--negative) 12%, transparent);
+}
