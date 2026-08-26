@@ -70,14 +70,6 @@ export const addObligation = createAsyncThunk<Obligation, ObligationDraft>(
   },
 );
 
-export const updateObligation = createAsyncThunk<Obligation, Obligation>(
-  'ledger/update',
-  async (obligation) => {
-    await store.put(obligation);
-    return obligation;
-  },
-);
-
 export const deleteObligation = createAsyncThunk<string, string>('ledger/delete', async (id) => {
   await store.remove(id);
   return id;
@@ -150,9 +142,6 @@ const ledgerSlice = createSlice({
       })
       .addCase(addObligation.fulfilled, (state, action) => {
         state.userEntered.push(action.payload);
-      })
-      .addCase(updateObligation.fulfilled, (state, action) => {
-        replaceIn(state.userEntered, action.payload);
       })
       .addCase(deleteObligation.fulfilled, (state, action) => {
         state.userEntered = state.userEntered.filter((row) => row.id !== action.payload);

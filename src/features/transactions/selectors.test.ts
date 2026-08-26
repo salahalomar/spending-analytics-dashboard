@@ -151,7 +151,9 @@ describe('selectFilteredTransactions', () => {
   });
 
   it('filters by category, treating an empty selection as "all"', () => {
-    expect(selectFilteredTransactions(buildState(dataset, { filters: { categories: [] } }))).toHaveLength(6);
+    expect(
+      selectFilteredTransactions(buildState(dataset, { filters: { categories: [] } })),
+    ).toHaveLength(6);
     expect(
       selectFilteredTransactions(buildState(dataset, { filters: { categories: ['Groceries'] } })),
     ).toHaveLength(2);
@@ -320,9 +322,7 @@ describe('selectSpendByCategory', () => {
 describe('selectIncomeByCategory', () => {
   it('aggregates income only', () => {
     const result = selectIncomeByCategory(buildState(dataset));
-    expect(result).toEqual([
-      { category: 'Salary', totalMinor: 250_000, count: 1, share: 1 },
-    ]);
+    expect(result).toEqual([{ category: 'Salary', totalMinor: 250_000, count: 1, share: 1 }]);
   });
 });
 

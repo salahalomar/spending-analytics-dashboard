@@ -33,7 +33,14 @@ export const EXPENSE_PROFILES: Record<ExpenseCategory, CategoryProfile> = {
     weight: 3,
   },
   Utilities: {
-    counterparties: ['Octopus Energy', 'Thames Water', 'British Gas', 'Virgin Media', 'EE', 'Council Tax'],
+    counterparties: [
+      'Octopus Energy',
+      'Thames Water',
+      'British Gas',
+      'Virgin Media',
+      'EE',
+      'Council Tax',
+    ],
     mean: 7200,
     stdDev: 3400,
     min: 900,
@@ -49,7 +56,15 @@ export const EXPENSE_PROFILES: Record<ExpenseCategory, CategoryProfile> = {
     weight: 20,
   },
   'Eating Out': {
-    counterparties: ['Pret A Manger', 'Dishoom', 'Nando’s', 'Wagamama', 'Deliveroo', 'Honest Burgers', 'Costa'],
+    counterparties: [
+      'Pret A Manger',
+      'Dishoom',
+      'Nando’s',
+      'Wagamama',
+      'Deliveroo',
+      'Honest Burgers',
+      'Costa',
+    ],
     mean: 1400,
     stdDev: 1100,
     min: 250,
@@ -65,7 +80,14 @@ export const EXPENSE_PROFILES: Record<ExpenseCategory, CategoryProfile> = {
     weight: 14,
   },
   Entertainment: {
-    counterparties: ['Odeon', 'Ticketmaster', 'Steam', 'PlayStation Store', 'Dice', 'Everyman Cinema'],
+    counterparties: [
+      'Odeon',
+      'Ticketmaster',
+      'Steam',
+      'PlayStation Store',
+      'Dice',
+      'Everyman Cinema',
+    ],
     mean: 1800,
     stdDev: 1400,
     min: 280,

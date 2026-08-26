@@ -11,7 +11,6 @@ export const selectShowSample = (state: RootState) => state.transactions.showSam
 export const selectTransactionsStatus = (state: RootState) => state.transactions.status;
 export const selectTransactionsError = (state: RootState) => state.transactions.error;
 export const selectGeneratedInMs = (state: RootState) => state.transactions.generatedInMs;
-export const selectUserEnteredCount = (state: RootState) => state.transactions.userEntered.length;
 export const selectFilters = (state: RootState) => state.filters;
 
 const selectDirectionFilter = (state: RootState) => state.filters.direction;

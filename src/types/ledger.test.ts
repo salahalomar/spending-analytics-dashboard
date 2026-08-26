@@ -1,17 +1,13 @@
 import { makeObligation } from '@/test/fixtures';
-import {
-  ageingBucketFor,
-  daysUntilDue,
-  deriveStatus,
-  isSettled,
-  outstandingMinor,
-} from './ledger';
+import { ageingBucketFor, daysUntilDue, deriveStatus, isSettled, outstandingMinor } from './ledger';
 
 const NOW = Date.parse('2025-07-15T12:00:00.000Z');
 
 describe('outstandingMinor', () => {
   it('subtracts what has been paid', () => {
-    expect(outstandingMinor(makeObligation({ amountMinor: 5000, amountPaidMinor: 2000 }))).toBe(3000);
+    expect(outstandingMinor(makeObligation({ amountMinor: 5000, amountPaidMinor: 2000 }))).toBe(
+      3000,
+    );
   });
 
   it('never goes negative on an overpayment', () => {
@@ -43,17 +39,29 @@ describe('deriveStatus', () => {
   });
 
   it('reports part-paid when something has been paid but not all', () => {
-    const obligation = makeObligation({ dueOn: '2025-08-01', amountMinor: 5000, amountPaidMinor: 2000 });
+    const obligation = makeObligation({
+      dueOn: '2025-08-01',
+      amountMinor: 5000,
+      amountPaidMinor: 2000,
+    });
     expect(deriveStatus(obligation, NOW)).toBe('part-paid');
   });
 
   it('prefers overdue over part-paid, since the date is the urgent fact', () => {
-    const obligation = makeObligation({ dueOn: '2025-06-01', amountMinor: 5000, amountPaidMinor: 2000 });
+    const obligation = makeObligation({
+      dueOn: '2025-06-01',
+      amountMinor: 5000,
+      amountPaidMinor: 2000,
+    });
     expect(deriveStatus(obligation, NOW)).toBe('overdue');
   });
 
   it('reports settled regardless of the date', () => {
-    const obligation = makeObligation({ dueOn: '2020-01-01', amountMinor: 5000, amountPaidMinor: 5000 });
+    const obligation = makeObligation({
+      dueOn: '2020-01-01',
+      amountMinor: 5000,
+      amountPaidMinor: 5000,
+    });
     expect(deriveStatus(obligation, NOW)).toBe('settled');
   });
 

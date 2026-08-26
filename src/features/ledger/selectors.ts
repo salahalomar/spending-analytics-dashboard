@@ -8,7 +8,6 @@ import {
   outstandingMinor,
   type AgeingBucketId,
   type Obligation,
-  type ObligationDirection,
   type ObligationStatus,
 } from '@/types/ledger';
 
@@ -16,7 +15,6 @@ const selectSample = (state: RootState) => state.ledger.sample;
 const selectUserEntered = (state: RootState) => state.ledger.userEntered;
 
 export const selectLedgerStatus = (state: RootState) => state.ledger.status;
-export const selectLedgerError = (state: RootState) => state.ledger.error;
 const selectShowSample = (state: RootState) => state.transactions.showSample;
 
 /** Every debt on record, the user's own first. */
@@ -33,10 +31,6 @@ export const selectReceivables = createSelector([selectAllObligations], (obligat
 export const selectPayables = createSelector([selectAllObligations], (obligations) =>
   obligations.filter((obligation) => obligation.direction === 'payable'),
 );
-
-export function selectObligationsFor(direction: ObligationDirection) {
-  return direction === 'receivable' ? selectReceivables : selectPayables;
-}
 
 export interface ObligationView {
   obligation: Obligation;

@@ -16,7 +16,7 @@ if (typeof globalThis.TextDecoder === 'undefined') {
 // back to memory, so the persistence tests would pass while testing nothing.
 // V8's serialiser is a faithful structured clone for the shapes stored here.
 if (typeof globalThis.structuredClone === 'undefined') {
-  globalThis.structuredClone = (<T,>(value: T): T =>
+  globalThis.structuredClone = (<T>(value: T): T =>
     deserialize(serialize(value)) as T) as typeof globalThis.structuredClone;
 }
 

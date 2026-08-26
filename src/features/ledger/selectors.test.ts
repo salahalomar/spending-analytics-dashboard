@@ -13,13 +13,37 @@ const OWED_TO_YOU = [
   makeObligation({ id: 'r1', counterparty: 'Jamie', amountMinor: 5000, dueOn: '2025-07-01' }),
   makeObligation({ id: 'r2', counterparty: 'Priya', amountMinor: 8000, dueOn: '2025-07-20' }),
   makeObligation({ id: 'r3', counterparty: 'Jamie', amountMinor: 3000, dueOn: '2025-09-30' }),
-  makeObligation({ id: 'r4', counterparty: 'Tom', amountMinor: 10_000, amountPaidMinor: 10_000, dueOn: '2025-06-01' }),
-  makeObligation({ id: 'r5', counterparty: 'Gone', amountMinor: 2000, state: 'written-off', dueOn: '2025-01-01' }),
+  makeObligation({
+    id: 'r4',
+    counterparty: 'Tom',
+    amountMinor: 10_000,
+    amountPaidMinor: 10_000,
+    dueOn: '2025-06-01',
+  }),
+  makeObligation({
+    id: 'r5',
+    counterparty: 'Gone',
+    amountMinor: 2000,
+    state: 'written-off',
+    dueOn: '2025-01-01',
+  }),
 ];
 
 const YOU_OWE = [
-  makeObligation({ id: 'p1', direction: 'payable', counterparty: 'Barclaycard', amountMinor: 40_000, dueOn: '2025-07-10' }),
-  makeObligation({ id: 'p2', direction: 'payable', counterparty: 'Dad', amountMinor: 20_000, dueOn: '2025-08-05' }),
+  makeObligation({
+    id: 'p1',
+    direction: 'payable',
+    counterparty: 'Barclaycard',
+    amountMinor: 40_000,
+    dueOn: '2025-07-10',
+  }),
+  makeObligation({
+    id: 'p2',
+    direction: 'payable',
+    counterparty: 'Dad',
+    amountMinor: 20_000,
+    dueOn: '2025-08-05',
+  }),
 ];
 
 describe('toViews', () => {
@@ -80,7 +104,9 @@ describe('summariseObligations', () => {
   });
 
   it('counts only the unpaid remainder of a part-paid debt', () => {
-    const partPaid = [makeObligation({ amountMinor: 10_000, amountPaidMinor: 4000, dueOn: '2025-08-01' })];
+    const partPaid = [
+      makeObligation({ amountMinor: 10_000, amountPaidMinor: 4000, dueOn: '2025-08-01' }),
+    ];
     expect(summariseObligations(partPaid, NOW).outstandingMinor).toBe(6000);
   });
 });
@@ -111,8 +137,18 @@ describe('netPosition', () => {
 describe('groupByCounterparty', () => {
   it('combines multiple debts with the same person, largest first', () => {
     const groups = groupByCounterparty(OWED_TO_YOU, NOW);
-    expect(groups[0]).toEqual({ counterparty: 'Jamie', outstandingMinor: 8000, count: 2, overdue: true });
-    expect(groups[1]).toEqual({ counterparty: 'Priya', outstandingMinor: 8000, count: 1, overdue: false });
+    expect(groups[0]).toEqual({
+      counterparty: 'Jamie',
+      outstandingMinor: 8000,
+      count: 2,
+      overdue: true,
+    });
+    expect(groups[1]).toEqual({
+      counterparty: 'Priya',
+      outstandingMinor: 8000,
+      count: 1,
+      overdue: false,
+    });
   });
 
   it('leaves out anyone who has settled up', () => {

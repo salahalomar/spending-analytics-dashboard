@@ -154,7 +154,10 @@ function generateSalary(rng: Rng, startMs: number, endMs: number): Transaction[]
     if (timestamp >= startMs) {
       const progress = (timestamp - startMs) / (endMs - startMs);
       const amountMinor = Math.round(
-        Math.min(Math.max(base * (0.99 + rng() * 0.02) * (1 + progress * 0.06), profile.min), profile.max),
+        Math.min(
+          Math.max(base * (0.99 + rng() * 0.02) * (1 + progress * 0.06), profile.min),
+          profile.max,
+        ),
       );
 
       salaries.push({

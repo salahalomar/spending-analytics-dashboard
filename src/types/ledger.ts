@@ -98,7 +98,8 @@ export type AgeingBucketId = (typeof AGEING_BUCKETS)[number]['id'];
 export function ageingBucketFor(obligation: Obligation, nowMs: number): AgeingBucketId {
   const daysOverdue = -daysUntilDue(obligation, nowMs);
   const bucket = AGEING_BUCKETS.find(
-    (candidate) => daysOverdue >= candidate.minDaysOverdue && daysOverdue <= candidate.maxDaysOverdue,
+    (candidate) =>
+      daysOverdue >= candidate.minDaysOverdue && daysOverdue <= candidate.maxDaysOverdue,
   );
   return bucket?.id ?? 'current';
 }

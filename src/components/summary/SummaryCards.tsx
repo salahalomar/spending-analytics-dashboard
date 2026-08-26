@@ -1,6 +1,11 @@
 import { useAppSelector } from '@/app/hooks';
 import { selectSummary } from '@/features/transactions/selectors';
-import { formatCurrency, formatCount, formatSignedCurrency, formatSignedPercent } from '@/utils/format';
+import {
+  formatCurrency,
+  formatCount,
+  formatSignedCurrency,
+  formatSignedPercent,
+} from '@/utils/format';
 import styles from './SummaryCards.module.css';
 
 /**
@@ -26,7 +31,10 @@ export function SummaryCards() {
 
       <article className={styles.card}>
         <span className={styles.label}>Money out</span>
-        <span className={`${styles.value} ${styles.negative} numeric`} data-testid="summary-expense">
+        <span
+          className={`${styles.value} ${styles.negative} numeric`}
+          data-testid="summary-expense"
+        >
           {formatCurrency(summary.expenseMinor)}
         </span>
         <div className={styles.meta}>

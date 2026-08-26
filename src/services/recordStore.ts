@@ -183,10 +183,26 @@ export function createRecordStore<T extends Identified>(storeName: StoreName): R
   }
 
   return {
-    getAll: () => withFallback(() => primary.getAll(), () => fallback.getAll()),
-    put: (record) => withFallback(() => primary.put(record), () => fallback.put(record)),
-    remove: (id) => withFallback(() => primary.remove(id), () => fallback.remove(id)),
-    clear: () => withFallback(() => primary.clear(), () => fallback.clear()),
+    getAll: () =>
+      withFallback(
+        () => primary.getAll(),
+        () => fallback.getAll(),
+      ),
+    put: (record) =>
+      withFallback(
+        () => primary.put(record),
+        () => fallback.put(record),
+      ),
+    remove: (id) =>
+      withFallback(
+        () => primary.remove(id),
+        () => fallback.remove(id),
+      ),
+    clear: () =>
+      withFallback(
+        () => primary.clear(),
+        () => fallback.clear(),
+      ),
   };
 }
 

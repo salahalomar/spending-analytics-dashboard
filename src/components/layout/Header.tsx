@@ -1,10 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { themeToggled } from '@/features/ui/uiSlice';
-import { loadTransactions } from '@/features/transactions/transactionsSlice';
-import {
-  DEFAULT_TRANSACTION_COUNT,
-  STRESS_TRANSACTION_COUNT,
-} from '@/data/generateTransactions';
+import { loadTransactions, sampleDataToggled } from '@/features/transactions/transactionsSlice';
+import { DEFAULT_TRANSACTION_COUNT, STRESS_TRANSACTION_COUNT } from '@/data/generateTransactions';
 import { selectGeneratedInMs, selectAllTransactions } from '@/features/transactions/selectors';
 import { formatCount } from '@/utils/format';
 import styles from './Header.module.css';
@@ -15,12 +12,19 @@ export function Header() {
   const generatedInMs = useAppSelector(selectGeneratedInMs);
   const total = useAppSelector(selectAllTransactions).length;
   const sampleSize = useAppSelector((state) => state.transactions.sampleSize);
+  const showSample = useAppSelector((state) => state.transactions.showSample);
+  const ownCount = useAppSelector((state) => state.transactions.userEntered.length);
   const stressed = sampleSize >= STRESS_TRANSACTION_COUNT;
 
-  const subtitle =
-    total === 0
-      ? 'Loading your data…'
-      : `${formatCount(total)} transactions${generatedInMs === null ? '' : ` · loaded in ${generatedInMs}ms`}`;
+  const subtitle = (() => {
+    if (total === 0 && ownCount === 0) {
+      return showSample ? 'Loading your data…' : 'No records yet — add one to get started';
+    }
+
+    const scope = showSample ? 'transactions' : 'of your own records';
+    const timing = showSample && generatedInMs !== null ? ` · loaded in ${generatedInMs}ms` : '';
+    return `${formatCount(total)} ${scope}${timing}`;
+  })();
 
   return (
     <header className={styles.header}>
@@ -49,6 +53,17 @@ export function Header() {
       </div>
 
       <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.stressToggle}
+          onClick={() => dispatch(sampleDataToggled())}
+          aria-pressed={!showSample}
+          title="Hide the sample data and show only the records you have added."
+          data-testid="sample-toggle"
+        >
+          {showSample ? 'Only my records' : `Show sample${ownCount > 0 ? '' : ' data'}`}
+        </button>
+
         <button
           type="button"
           className={styles.stressToggle}

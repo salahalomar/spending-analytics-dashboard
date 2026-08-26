@@ -4,7 +4,12 @@ import type {
   TransactionDirection,
   TransactionStatus,
 } from '@/types/transaction';
-import type { Obligation, ObligationDirection, ObligationKind, ObligationState } from '@/types/ledger';
+import type {
+  Obligation,
+  ObligationDirection,
+  ObligationKind,
+  ObligationState,
+} from '@/types/ledger';
 
 let sequence = 0;
 
@@ -48,11 +53,42 @@ export function makeTransaction(overrides: TransactionOverrides = {}): Transacti
 /** A small, hand-checkable dataset used across the selector tests. */
 export function makeTransactionSet(): Transaction[] {
   return [
-    makeTransaction({ id: 'a', counterparty: 'Tesco', category: 'Groceries', amountMinor: 5000, date: '2025-06-10T10:00:00.000Z' }),
-    makeTransaction({ id: 'b', counterparty: 'Uber', category: 'Transport', amountMinor: 2500, date: '2025-06-05T10:00:00.000Z' }),
-    makeTransaction({ id: 'c', counterparty: 'Netflix', category: 'Subscriptions', amountMinor: 1099, date: '2025-05-20T10:00:00.000Z' }),
-    makeTransaction({ id: 'd', counterparty: 'Tesco', category: 'Groceries', amountMinor: 7500, date: '2025-05-02T10:00:00.000Z' }),
-    makeTransaction({ id: 'e', counterparty: 'Amazon', category: 'Shopping', amountMinor: 12_000, date: '2025-04-18T10:00:00.000Z', status: 'pending' }),
+    makeTransaction({
+      id: 'a',
+      counterparty: 'Tesco',
+      category: 'Groceries',
+      amountMinor: 5000,
+      date: '2025-06-10T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'b',
+      counterparty: 'Uber',
+      category: 'Transport',
+      amountMinor: 2500,
+      date: '2025-06-05T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'c',
+      counterparty: 'Netflix',
+      category: 'Subscriptions',
+      amountMinor: 1099,
+      date: '2025-05-20T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'd',
+      counterparty: 'Tesco',
+      category: 'Groceries',
+      amountMinor: 7500,
+      date: '2025-05-02T10:00:00.000Z',
+    }),
+    makeTransaction({
+      id: 'e',
+      counterparty: 'Amazon',
+      category: 'Shopping',
+      amountMinor: 12_000,
+      date: '2025-04-18T10:00:00.000Z',
+      status: 'pending',
+    }),
     makeTransaction({
       id: 'f',
       direction: 'income',

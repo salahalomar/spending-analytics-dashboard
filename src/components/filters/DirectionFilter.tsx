@@ -1,5 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { directionChanged, type DirectionFilter as Direction } from '@/features/filters/filtersSlice';
+import {
+  directionChanged,
+  type DirectionFilter as Direction,
+} from '@/features/filters/filtersSlice';
 import styles from './FilterPanel.module.css';
 
 const OPTIONS: readonly { id: Direction; label: string }[] = [

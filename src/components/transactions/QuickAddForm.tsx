@@ -3,11 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { addTransaction } from '@/features/transactions/transactionsSlice';
 import { selectDistinctCounterparties } from '@/features/transactions/selectors';
 import { parseAmountToMinor } from '@/features/transactions/selectors';
-import {
-  categoriesFor,
-  type Category,
-  type TransactionDirection,
-} from '@/types/transaction';
+import { categoriesFor, type Category, type TransactionDirection } from '@/types/transaction';
 import { toDateInputValue } from '@/utils/date';
 import styles from './QuickAddForm.module.css';
 
@@ -46,7 +42,8 @@ export function QuickAddForm() {
   }
 
   const amountMinor = parseAmountToMinor(amount);
-  const canSubmit = counterparty.trim() !== '' && amountMinor !== null && amountMinor > 0 && !saving;
+  const canSubmit =
+    counterparty.trim() !== '' && amountMinor !== null && amountMinor > 0 && !saving;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -192,7 +189,12 @@ export function QuickAddForm() {
         />
       </div>
 
-      <button type="submit" className={styles.submit} disabled={!canSubmit} data-testid="quick-add-submit">
+      <button
+        type="submit"
+        className={styles.submit}
+        disabled={!canSubmit}
+        data-testid="quick-add-submit"
+      >
         {saving ? 'Adding…' : 'Add'}
       </button>
 
@@ -201,9 +203,7 @@ export function QuickAddForm() {
           {error}
         </p>
       ) : (
-        <p className={styles.hint}>
-          Saved in this browser only — nothing is uploaded anywhere.
-        </p>
+        <p className={styles.hint}>Saved in this browser only — nothing is uploaded anywhere.</p>
       )}
     </form>
   );

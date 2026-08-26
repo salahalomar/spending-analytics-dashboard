@@ -43,7 +43,10 @@ export function OverviewPage() {
       <div className={styles.headline}>
         <article className={styles.card}>
           <span className={styles.label}>Money in</span>
-          <span className={`${styles.value} ${styles.positive} numeric`} data-testid="overview-income">
+          <span
+            className={`${styles.value} ${styles.positive} numeric`}
+            data-testid="overview-income"
+          >
             {formatCurrency(summary.incomeMinor)}
           </span>
           <p className={styles.meta}>in the selected period</p>
@@ -51,7 +54,10 @@ export function OverviewPage() {
 
         <article className={styles.card}>
           <span className={styles.label}>Money out</span>
-          <span className={`${styles.value} ${styles.negative} numeric`} data-testid="overview-expense">
+          <span
+            className={`${styles.value} ${styles.negative} numeric`}
+            data-testid="overview-expense"
+          >
             {formatCurrency(summary.expenseMinor)}
           </span>
           <p className={styles.meta}>in the selected period</p>

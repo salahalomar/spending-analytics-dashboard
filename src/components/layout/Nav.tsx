@@ -1,7 +1,11 @@
 import { NavLink } from 'react-router-dom';
 import { useAppSelector } from '@/app/hooks';
 import { useNow } from '@/hooks/useNow';
-import { selectPayables, selectReceivables, summariseObligations } from '@/features/ledger/selectors';
+import {
+  selectPayables,
+  selectReceivables,
+  summariseObligations,
+} from '@/features/ledger/selectors';
 import styles from './Nav.module.css';
 
 /**

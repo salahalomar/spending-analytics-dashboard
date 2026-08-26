@@ -38,9 +38,7 @@ export function CashFlowChart() {
       return { incomePoints: [], expensePoints: [], ticks: [] as number[], domainMax: 0 };
     }
 
-    const peak = Math.max(
-      ...data.map((datum) => Math.max(datum.incomeMinor, datum.expenseMinor)),
-    );
+    const peak = Math.max(...data.map((datum) => Math.max(datum.incomeMinor, datum.expenseMinor)));
     const domainMax = niceUpperBound(peak);
 
     const pointsFor = (pick: (index: number) => number) =>
@@ -68,7 +66,7 @@ export function CashFlowChart() {
   const { incomePoints, expensePoints, ticks, domainMax } = geometry;
   const activeIndex = hoverIndex === null ? null : Math.min(hoverIndex, data.length - 1);
   const activeDatum = activeIndex === null ? null : data[activeIndex];
-  const activeX = activeIndex === null ? null : incomePoints[activeIndex]?.x ?? null;
+  const activeX = activeIndex === null ? null : (incomePoints[activeIndex]?.x ?? null);
 
   // Label every nth month so the axis never overlaps itself.
   const labelStride = Math.max(1, Math.ceil(data.length / 7));
@@ -102,77 +100,83 @@ export function CashFlowChart() {
       </div>
 
       <div className={styles.plot} ref={wrapperRef}>
-      {width > 0 && height > 0 ? (
-        <svg
-          className={styles.svg}
-          width={width}
-          height={height}
-          role="img"
-          tabIndex={0}
-          aria-label={`Money in and out per month across ${data.length} months. Use the arrow keys to step through the series.`}
-          onPointerMove={handlePointerMove}
-          onPointerLeave={() => setHoverIndex(null)}
-          onBlur={() => setHoverIndex(null)}
-          onKeyDown={handleKeyDown}
-        >
-          <defs>
-            <linearGradient id={GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--negative)" stopOpacity="0.26" />
-              <stop offset="100%" stopColor="var(--negative)" stopOpacity="0.02" />
-            </linearGradient>
-          </defs>
+        {width > 0 && height > 0 ? (
+          <svg
+            className={styles.svg}
+            width={width}
+            height={height}
+            role="img"
+            tabIndex={0}
+            aria-label={`Money in and out per month across ${data.length} months. Use the arrow keys to step through the series.`}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={() => setHoverIndex(null)}
+            onBlur={() => setHoverIndex(null)}
+            onKeyDown={handleKeyDown}
+          >
+            <defs>
+              <linearGradient id={GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--negative)" stopOpacity="0.26" />
+                <stop offset="100%" stopColor="var(--negative)" stopOpacity="0.02" />
+              </linearGradient>
+            </defs>
 
-          <g transform={`translate(${PADDING.left}, ${PADDING.top})`}>
-            {ticks.map((tick) => {
-              const y = scaleValueToY(tick, domainMax, innerHeight);
-              return (
-                <g key={tick}>
-                  <line className={styles.grid} x1={0} y1={y} x2={innerWidth} y2={y} />
-                  <text className={styles.axisLabel} x={-8} y={y + 3} textAnchor="end">
-                    {formatCompactCurrency(tick)}
-                  </text>
+            <g transform={`translate(${PADDING.left}, ${PADDING.top})`}>
+              {ticks.map((tick) => {
+                const y = scaleValueToY(tick, domainMax, innerHeight);
+                return (
+                  <g key={tick}>
+                    <line className={styles.grid} x1={0} y1={y} x2={innerWidth} y2={y} />
+                    <text className={styles.axisLabel} x={-8} y={y + 3} textAnchor="end">
+                      {formatCompactCurrency(tick)}
+                    </text>
+                  </g>
+                );
+              })}
+
+              <path d={buildAreaPath(expensePoints, innerHeight)} fill={`url(#${GRADIENT_ID})`} />
+              <path className={styles.expenseLine} d={buildLinePath(expensePoints)} />
+              <path className={styles.incomeLine} d={buildLinePath(incomePoints)} />
+
+              {activeX !== null ? (
+                <g>
+                  <line
+                    className={styles.guide}
+                    x1={activeX}
+                    y1={0}
+                    x2={activeX}
+                    y2={innerHeight}
+                  />
+                  <circle
+                    className={`${styles.marker} ${styles.markerIncome}`}
+                    cx={activeX}
+                    cy={incomePoints[activeIndex!]!.y}
+                    r={4}
+                  />
+                  <circle
+                    className={`${styles.marker} ${styles.markerExpense}`}
+                    cx={activeX}
+                    cy={expensePoints[activeIndex!]!.y}
+                    r={4}
+                  />
                 </g>
-              );
-            })}
+              ) : null}
 
-            <path d={buildAreaPath(expensePoints, innerHeight)} fill={`url(#${GRADIENT_ID})`} />
-            <path className={styles.expenseLine} d={buildLinePath(expensePoints)} />
-            <path className={styles.incomeLine} d={buildLinePath(incomePoints)} />
-
-            {activeX !== null ? (
-              <g>
-                <line className={styles.guide} x1={activeX} y1={0} x2={activeX} y2={innerHeight} />
-                <circle
-                  className={`${styles.marker} ${styles.markerIncome}`}
-                  cx={activeX}
-                  cy={incomePoints[activeIndex!]!.y}
-                  r={4}
-                />
-                <circle
-                  className={`${styles.marker} ${styles.markerExpense}`}
-                  cx={activeX}
-                  cy={expensePoints[activeIndex!]!.y}
-                  r={4}
-                />
-              </g>
-            ) : null}
-
-            {data.map((datum, index) =>
-              index % labelStride === 0 ? (
-                <text
-                  key={datum.month}
-                  className={styles.axisLabel}
-                  x={incomePoints[index]!.x}
-                  y={innerHeight + 15}
-                  textAnchor="middle"
-                >
-                  {formatMonthLabel(datum.month)}
-                </text>
-              ) : null,
-            )}
-          </g>
-        </svg>
-      ) : null}
+              {data.map((datum, index) =>
+                index % labelStride === 0 ? (
+                  <text
+                    key={datum.month}
+                    className={styles.axisLabel}
+                    x={incomePoints[index]!.x}
+                    y={innerHeight + 15}
+                    textAnchor="middle"
+                  >
+                    {formatMonthLabel(datum.month)}
+                  </text>
+                ) : null,
+              )}
+            </g>
+          </svg>
+        ) : null}
       </div>
 
       {activeDatum && activeX !== null ? (
@@ -191,8 +195,7 @@ export function CashFlowChart() {
             Out <strong className="numeric">{formatCurrency(activeDatum.expenseMinor)}</strong>
           </span>
           <span className={styles.tooltipNet}>
-            Net{' '}
-            <strong className="numeric">{formatSignedCurrency(activeDatum.netMinor)}</strong>
+            Net <strong className="numeric">{formatSignedCurrency(activeDatum.netMinor)}</strong>
           </span>
         </div>
       ) : null}

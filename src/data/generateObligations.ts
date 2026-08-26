@@ -126,4 +126,3 @@ export function suggestedCounterparties(direction: ObligationDirection): string[
   const source = direction === 'receivable' ? OWED_TO_YOU : YOU_OWE;
   return source.map(([counterparty]) => counterparty);
 }
-

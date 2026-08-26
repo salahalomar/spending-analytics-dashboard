@@ -13,9 +13,15 @@ describe('Personal finance dashboard', () => {
   });
 
   it('opens on the overview with the whole position', () => {
-    cy.byTestId('overview-income').invoke('text').should('match', /^£[\d,]+\.\d{2}$/);
-    cy.byTestId('overview-expense').invoke('text').should('match', /^£[\d,]+\.\d{2}$/);
-    cy.byTestId('overview-net').invoke('text').should('match', /^[+-]?£[\d,]+\.\d{2}$/);
+    cy.byTestId('overview-income')
+      .invoke('text')
+      .should('match', /^£[\d,]+\.\d{2}$/);
+    cy.byTestId('overview-expense')
+      .invoke('text')
+      .should('match', /^£[\d,]+\.\d{2}$/);
+    cy.byTestId('overview-net')
+      .invoke('text')
+      .should('match', /^[+-]?£[\d,]+\.\d{2}$/);
     cy.byTestId('overview-owed-to-you').should('be.visible');
     cy.byTestId('overview-you-owe').should('be.visible');
 
@@ -167,7 +173,9 @@ describe('Personal finance dashboard', () => {
     cy.byTestId('nav-i-owe').click();
 
     cy.byTestId('ledger-page-payable').should('be.visible');
-    cy.byTestId('ledger-outstanding').invoke('text').should('match', /^£[\d,]+\.\d{2}$/);
+    cy.byTestId('ledger-outstanding')
+      .invoke('text')
+      .should('match', /^£[\d,]+\.\d{2}$/);
     cy.byTestId('ledger-ageing').should('be.visible');
     cy.get('[data-testid="ledger-row"]').should('have.length.greaterThan', 0);
   });

@@ -1,4 +1,4 @@
-import { CATEGORIES, PAYMENT_METHODS, directionOfCategory } from '@/types/transaction';
+import { CATEGORIES, INCOME_CATEGORIES, PAYMENT_METHODS } from '@/types/transaction';
 import { CATEGORY_PROFILES } from '@/data/counterparties';
 import {
   datasetEndDate,
@@ -72,8 +72,10 @@ describe('generateTransactions', () => {
   });
 
   it('keeps the category on the same side of the ledger as the direction', () => {
+    const incomeCategories = new Set<string>(INCOME_CATEGORIES);
     for (const transaction of transactions) {
-      expect(directionOfCategory(transaction.category)).toBe(transaction.direction);
+      const expected = incomeCategories.has(transaction.category) ? 'income' : 'expense';
+      expect(transaction.direction).toBe(expected);
     }
   });
 
@@ -113,9 +115,9 @@ describe('generateTransactions', () => {
 
   it('builds the stress dataset in a reasonable time', () => {
     const startedAt = Date.now();
-    expect(generateTransactions({ count: STRESS_TRANSACTION_COUNT, endDate: FIXED_END })).toHaveLength(
-      50_000,
-    );
+    expect(
+      generateTransactions({ count: STRESS_TRANSACTION_COUNT, endDate: FIXED_END }),
+    ).toHaveLength(50_000);
     expect(Date.now() - startedAt).toBeLessThan(5000);
   });
 

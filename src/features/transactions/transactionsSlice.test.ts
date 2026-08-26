@@ -137,7 +137,11 @@ describe('transactionsSlice', () => {
       const second = makeTransaction({ id: 'second', date: '2025-05-01T10:00:00.000Z' });
       const seeded = reducer(initialState, userRecordsReceived([first, second]));
 
-      const moved = { ...first, date: '2025-01-01T10:00:00.000Z', timestamp: Date.parse('2025-01-01T10:00:00.000Z') };
+      const moved = {
+        ...first,
+        date: '2025-01-01T10:00:00.000Z',
+        timestamp: Date.parse('2025-01-01T10:00:00.000Z'),
+      };
       const state = reducer(seeded, updateTransaction.fulfilled(moved, 'req', moved));
 
       expect(state.userEntered.map((row) => row.id)).toEqual(['second', 'first']);
@@ -158,7 +162,11 @@ describe('transactionsSlice', () => {
 
       const saved = store.getState().transactions.userEntered;
       expect(saved).toHaveLength(1);
-      expect(saved[0]).toMatchObject({ counterparty: 'Tesco', amountMinor: 4250, userEntered: true });
+      expect(saved[0]).toMatchObject({
+        counterparty: 'Tesco',
+        amountMinor: 4250,
+        userEntered: true,
+      });
     });
   });
 });

@@ -18,7 +18,9 @@
   text-decoration: none;
   white-space: nowrap;
   border-bottom: 2px solid transparent;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .link:hover {

@@ -28,7 +28,8 @@ export function LedgerForm({ direction, onDone }: LedgerFormProps) {
   const [saving, setSaving] = useState(false);
 
   const amountMinor = parseAmountToMinor(amount);
-  const canSubmit = counterparty.trim() !== '' && amountMinor !== null && amountMinor > 0 && !saving;
+  const canSubmit =
+    counterparty.trim() !== '' && amountMinor !== null && amountMinor > 0 && !saving;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -176,7 +177,12 @@ export function LedgerForm({ direction, onDone }: LedgerFormProps) {
         <button type="button" className={styles.cancel} onClick={onDone}>
           Cancel
         </button>
-        <button type="submit" className={styles.submit} disabled={!canSubmit} data-testid="ledger-submit">
+        <button
+          type="submit"
+          className={styles.submit}
+          disabled={!canSubmit}
+          data-testid="ledger-submit"
+        >
           {saving ? 'Saving…' : 'Save'}
         </button>
       </div>

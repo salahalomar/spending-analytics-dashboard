@@ -46,9 +46,7 @@ export function LedgerPage({ direction }: LedgerPageProps) {
     <div className={styles.page} data-testid={`ledger-page-${direction}`}>
       <div className={styles.summaryGrid}>
         <article className={styles.card}>
-          <span className={styles.label}>
-            {isReceivable ? 'Owed to you' : 'You owe'}
-          </span>
+          <span className={styles.label}>{isReceivable ? 'Owed to you' : 'You owe'}</span>
           <span className={`${styles.value} numeric`} data-testid="ledger-outstanding">
             {formatCurrency(summary.outstandingMinor)}
           </span>
@@ -77,9 +75,7 @@ export function LedgerPage({ direction }: LedgerPageProps) {
           <span className={`${styles.value} numeric`} data-testid="ledger-due-soon">
             {formatCurrency(summary.dueSoonMinor)}
           </span>
-          <p className={styles.meta}>
-            {formatCount(summary.dueSoonCount)} coming up
-          </p>
+          <p className={styles.meta}>{formatCount(summary.dueSoonCount)} coming up</p>
         </article>
 
         <article className={styles.card}>
@@ -108,7 +104,11 @@ export function LedgerPage({ direction }: LedgerPageProps) {
             aria-expanded={formOpen}
             data-testid="toggle-ledger-form"
           >
-            {formOpen ? 'Close' : isReceivable ? 'Add someone who owes you' : 'Add something you owe'}
+            {formOpen
+              ? 'Close'
+              : isReceivable
+                ? 'Add someone who owes you'
+                : 'Add something you owe'}
           </button>
         </div>
 

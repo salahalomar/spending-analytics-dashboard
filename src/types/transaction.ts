@@ -42,10 +42,6 @@ export function categoriesFor(direction: TransactionDirection): readonly Categor
   return direction === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 }
 
-export function directionOfCategory(category: Category): TransactionDirection {
-  return (INCOME_CATEGORIES as readonly string[]).includes(category) ? 'income' : 'expense';
-}
-
 export const PAYMENT_METHODS = [
   'Card',
   'Bank Transfer',
@@ -80,10 +76,3 @@ export interface Transaction {
 
 export type SortField = 'date' | 'amount' | 'counterparty';
 export type SortDirection = 'asc' | 'desc';
-
-/** Signed value in minor units: income positive, spending negative. */
-export function signedAmountMinor(
-  transaction: Pick<Transaction, 'direction' | 'amountMinor'>,
-): number {
-  return transaction.direction === 'income' ? transaction.amountMinor : -transaction.amountMinor;
-}

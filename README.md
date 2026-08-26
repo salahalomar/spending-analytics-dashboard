@@ -32,16 +32,16 @@ no backend.
 
 ## Built with
 
-| Concern | Choice |
-| --- | --- |
-| UI | React 18 + TypeScript (strict) |
-| State | Redux Toolkit + Reselect |
-| Routing | React Router 7 |
-| Storage | IndexedDB, with an in-memory fallback |
-| Build | Vite 6 |
-| Unit / integration tests | Jest + React Testing Library |
-| End-to-end tests | Cypress |
-| Quality | ESLint (type-aware) + Prettier, enforced in CI |
+| Concern                  | Choice                                         |
+| ------------------------ | ---------------------------------------------- |
+| UI                       | React 18 + TypeScript (strict)                 |
+| State                    | Redux Toolkit + Reselect                       |
+| Routing                  | React Router 7                                 |
+| Storage                  | IndexedDB, with an in-memory fallback          |
+| Build                    | Vite 6                                         |
+| Unit / integration tests | Jest + React Testing Library                   |
+| End-to-end tests         | Cypress                                        |
+| Quality                  | ESLint (type-aware) + Prettier, enforced in CI |
 
 No charting library and no virtual-list library — both are implemented here, because those are the
 interesting parts of the problem.
@@ -92,17 +92,17 @@ Then open http://localhost:5173.
 
 ### Scripts
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Dev server with hot reload |
-| `npm run build` | Typecheck, then production build to `dist/` |
-| `npm run preview` | Serve the production build on port 4173 |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | ESLint across the project |
-| `npm test` | Jest unit and integration tests |
-| `npm run test:coverage` | The same, with a coverage report |
-| `npm run cy:open` | Cypress in interactive mode |
-| `npm run e2e` | Build-and-serve, then run Cypress headlessly |
+| Command                 | What it does                                 |
+| ----------------------- | -------------------------------------------- |
+| `npm run dev`           | Dev server with hot reload                   |
+| `npm run build`         | Typecheck, then production build to `dist/`  |
+| `npm run preview`       | Serve the production build on port 4173      |
+| `npm run typecheck`     | `tsc --noEmit`                               |
+| `npm run lint`          | ESLint across the project                    |
+| `npm test`              | Jest unit and integration tests              |
+| `npm run test:coverage` | The same, with a coverage report             |
+| `npm run cy:open`       | Cypress in interactive mode                  |
+| `npm run e2e`           | Build-and-serve, then run Cypress headlessly |
 
 ## Testing
 
@@ -112,16 +112,16 @@ the production build.
 
 The suite is layered rather than uniform:
 
-- *Pure logic* — the PRNG, the generator, the scale maths, the ageing buckets and the virtualiser's
+- _Pure logic_ — the PRNG, the generator, the scale maths, the ageing buckets and the virtualiser's
   range calculation are tested directly as functions.
-- *Persistence* — exercised against a real IndexedDB via `fake-indexeddb`, including that a record
+- _Persistence_ — exercised against a real IndexedDB via `fake-indexeddb`, including that a record
   survives being read back through a fresh connection.
-- *Reducers and selectors* — hand-checkable fixtures, including boundary days on date ranges and the
+- _Reducers and selectors_ — hand-checkable fixtures, including boundary days on date ranges and the
   previous-period comparison.
-- *Components* — rendered against a **real store and a real router**, not mocks. The list is asserted
+- _Components_ — rendered against a **real store and a real router**, not mocks. The list is asserted
   to render ~20 rows for a 5,000-row dataset while still reporting the full count; the debounce is
   verified by dispatch count, so typing "tesco" must produce exactly one action.
-- *Integration* — [`App.test.tsx`](src/App.test.tsx) drives the whole dashboard through the UI.
+- _Integration_ — [`App.test.tsx`](src/App.test.tsx) drives the whole dashboard through the UI.
 
 [`jest.setup.ts`](jest.setup.ts) supplies what jsdom lacks: element dimensions, `ResizeObserver`,
 `PointerEvent`, `TextEncoder` and `structuredClone`. That last one mattered more than it sounds —
