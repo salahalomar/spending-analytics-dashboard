@@ -1,7 +1,7 @@
 import { CATEGORIES, PAYMENT_METHODS, directionOfCategory } from '@/types/transaction';
 import { CATEGORY_PROFILES } from '@/data/counterparties';
 import {
-  DATASET_END_DATE,
+  datasetEndDate,
   STRESS_TRANSACTION_COUNT,
   DATASET_SPAN_DAYS,
   generateTransactions,
@@ -10,23 +10,26 @@ import {
 
 const MS_PER_DAY = 86_400_000;
 
+/** Pinned so the date assertions do not move with the calendar. */
+const FIXED_END = new Date('2025-12-31T23:59:59.000Z');
+
 describe('generateTransactions', () => {
-  const transactions = generateTransactions({ count: 2400, seed: 1 });
+  const transactions = generateTransactions({ count: 2400, seed: 1, endDate: FIXED_END });
 
   it('generates exactly the requested number of transactions', () => {
     expect(transactions).toHaveLength(2400);
-    expect(generateTransactions({ count: 0 })).toHaveLength(0);
+    expect(generateTransactions({ count: 0, endDate: FIXED_END })).toHaveLength(0);
   });
 
   it('is deterministic for a given seed', () => {
-    expect(generateTransactions({ count: 50, seed: 1 })).toEqual(
-      generateTransactions({ count: 50, seed: 1 }),
+    expect(generateTransactions({ count: 50, seed: 1, endDate: FIXED_END })).toEqual(
+      generateTransactions({ count: 50, seed: 1, endDate: FIXED_END }),
     );
   });
 
   it('produces a different dataset for a different seed', () => {
-    expect(generateTransactions({ count: 50, seed: 1 })).not.toEqual(
-      generateTransactions({ count: 50, seed: 2 }),
+    expect(generateTransactions({ count: 50, seed: 1, endDate: FIXED_END })).not.toEqual(
+      generateTransactions({ count: 50, seed: 2, endDate: FIXED_END }),
     );
   });
 
@@ -43,7 +46,7 @@ describe('generateTransactions', () => {
   });
 
   it('keeps timestamps inside the dataset window', () => {
-    const endMs = DATASET_END_DATE.getTime();
+    const endMs = FIXED_END.getTime();
     const startMs = endMs - DATASET_SPAN_DAYS * MS_PER_DAY;
 
     for (const transaction of transactions) {
@@ -102,13 +105,17 @@ describe('generateTransactions', () => {
   });
 
   it('covers every category across a large enough sample', () => {
-    const seen = new Set(generateTransactions({ count: 20_000, seed: 4 }).map((t) => t.category));
+    const seen = new Set(
+      generateTransactions({ count: 20_000, seed: 4, endDate: FIXED_END }).map((t) => t.category),
+    );
     expect(seen.size).toBe(CATEGORIES.length);
   });
 
   it('builds the stress dataset in a reasonable time', () => {
     const startedAt = Date.now();
-    expect(generateTransactions({ count: STRESS_TRANSACTION_COUNT })).toHaveLength(50_000);
+    expect(generateTransactions({ count: STRESS_TRANSACTION_COUNT, endDate: FIXED_END })).toHaveLength(
+      50_000,
+    );
     expect(Date.now() - startedAt).toBeLessThan(5000);
   });
 
@@ -145,12 +152,28 @@ describe('generateTransactions', () => {
 
 describe('getDatasetDateRange', () => {
   it('reports the inclusive bounds as date-input values', () => {
-    expect(getDatasetDateRange()).toEqual({ start: '2024-01-01', end: '2025-12-31' });
+    expect(getDatasetDateRange({ endDate: FIXED_END })).toEqual({
+      start: '2024-01-01',
+      end: '2025-12-31',
+    });
   });
 
   it('honours a custom span', () => {
-    const range = getDatasetDateRange({ spanDays: 30 });
+    const range = getDatasetDateRange({ spanDays: 30, endDate: FIXED_END });
     expect(range.end).toBe('2025-12-31');
     expect(range.start).toBe('2025-12-01');
+  });
+
+  it('ends today by default, so newly added records fall inside it', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    expect(getDatasetDateRange().end).toBe(today);
+  });
+});
+
+describe('datasetEndDate', () => {
+  it('is the end of today in UTC', () => {
+    const end = datasetEndDate();
+    expect(end.toISOString().slice(0, 10)).toBe(new Date().toISOString().slice(0, 10));
+    expect(end.getUTCHours()).toBe(23);
   });
 });

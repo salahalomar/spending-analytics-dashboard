@@ -1,3 +1,5 @@
+import { getDatasetDateRange } from '@/data/generateTransactions';
+import { shiftDateInput } from '@/utils/date';
 import reducer, {
   categoriesCleared,
   categoryToggled,
@@ -14,13 +16,17 @@ import reducer, {
   statusToggled,
 } from './filtersSlice';
 
+// The sample data ends today, so the expected bounds are derived rather than
+// written down — hardcoding them would break every day.
+const RANGE = getDatasetDateRange();
+
 describe('filtersSlice', () => {
   it('starts with the full dataset range and no narrowing', () => {
     const state = reducer(undefined, { type: '@@INIT' });
     expect(state.counterpartyQuery).toBe('');
     expect(state.categories).toEqual([]);
-    expect(state.dateFrom).toBe('2024-01-01');
-    expect(state.dateTo).toBe('2025-12-31');
+    expect(state.dateFrom).toBe(RANGE.start);
+    expect(state.dateTo).toBe(RANGE.end);
     expect(state.sortField).toBe('date');
     expect(state.sortDirection).toBe('desc');
   });
@@ -96,25 +102,25 @@ describe('filtersSlice', () => {
 
     it('leaves a coherent range alone', () => {
       const state = reducer(initialState, dateFromChanged('2025-03-01'));
-      expect(state).toMatchObject({ dateFrom: '2025-03-01', dateTo: '2025-12-31' });
+      expect(state).toMatchObject({ dateFrom: '2025-03-01', dateTo: RANGE.end });
     });
 
     it('applies relative presets from the end of the dataset', () => {
       expect(reducer(initialState, datePresetApplied('30d'))).toMatchObject({
-        dateFrom: '2025-12-01',
-        dateTo: '2025-12-31',
+        dateFrom: shiftDateInput(RANGE.end, -30),
+        dateTo: RANGE.end,
       });
       expect(reducer(initialState, datePresetApplied('12m'))).toMatchObject({
-        dateFrom: '2024-12-31',
-        dateTo: '2025-12-31',
+        dateFrom: shiftDateInput(RANGE.end, -365),
+        dateTo: RANGE.end,
       });
     });
 
     it('restores the whole dataset for the all-time preset', () => {
       const narrowed = reducer(initialState, datePresetApplied('30d'));
       expect(reducer(narrowed, datePresetApplied('all'))).toMatchObject({
-        dateFrom: '2024-01-01',
-        dateTo: '2025-12-31',
+        dateFrom: RANGE.start,
+        dateTo: RANGE.end,
       });
     });
   });

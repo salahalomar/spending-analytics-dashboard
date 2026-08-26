@@ -1,6 +1,8 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithStore } from '@/test/renderWithStore';
+import { getDatasetDateRange } from '@/data/generateTransactions';
+import { shiftDateInput } from '@/utils/date';
 import { makeTransactionSet } from '@/test/fixtures';
 import { initialState as transactionsInitialState } from '@/features/transactions/transactionsSlice';
 import { FilterPanel } from './FilterPanel';
@@ -150,10 +152,11 @@ describe('FilterPanel', () => {
       const user = userEvent.setup();
       const { store } = renderPanel();
 
+      const range = getDatasetDateRange();
       await user.click(screen.getByTestId('date-preset-30d'));
       expect(store.getState().filters).toMatchObject({
-        dateFrom: '2025-12-01',
-        dateTo: '2025-12-31',
+        dateFrom: shiftDateInput(range.end, -30),
+        dateTo: range.end,
       });
     });
 

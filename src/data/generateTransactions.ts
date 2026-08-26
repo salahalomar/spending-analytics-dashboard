@@ -19,9 +19,25 @@ export const DEFAULT_SEED = 20240517;
  */
 export const DEFAULT_TRANSACTION_COUNT = 2400;
 export const STRESS_TRANSACTION_COUNT = 50_000;
-/** Transactions are spread across the two years leading up to this date. */
-export const DATASET_END_DATE = new Date('2025-12-31T23:59:59.000Z');
 export const DATASET_SPAN_DAYS = 730;
+
+/**
+ * The sample data ends today rather than on a fixed date.
+ *
+ * A hardcoded end date ages badly: months after it passes, every generated
+ * transaction sits outside the default filter range, anything the user adds
+ * today is invisible next to it, and every sample debt reads as overdue. The
+ * shape of the data is still deterministic for a given seed — only where it
+ * sits on the calendar moves.
+ *
+ * Tests that assert on concrete dates pass `endDate` explicitly.
+ */
+export function datasetEndDate(): Date {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 0),
+  );
+}
 
 /**
  * Roughly one row in twenty-five is money coming in, on top of the salary
@@ -235,7 +251,7 @@ export function generateTransactions(options: GenerateOptions = {}): Transaction
   const {
     count = DEFAULT_TRANSACTION_COUNT,
     seed = DEFAULT_SEED,
-    endDate = DATASET_END_DATE,
+    endDate = datasetEndDate(),
     spanDays = DATASET_SPAN_DAYS,
   } = options;
 
@@ -292,7 +308,7 @@ export function generateTransactions(options: GenerateOptions = {}): Transaction
 
 /** Inclusive bounds of the generated dataset, used to seed the date pickers. */
 export function getDatasetDateRange(options: GenerateOptions = {}): { start: string; end: string } {
-  const { endDate = DATASET_END_DATE, spanDays = DATASET_SPAN_DAYS } = options;
+  const { endDate = datasetEndDate(), spanDays = DATASET_SPAN_DAYS } = options;
   const endMs = endDate.getTime();
   const startMs = endMs - spanDays * MS_PER_DAY;
   return {

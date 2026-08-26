@@ -1,124 +1,175 @@
 /// <reference types="cypress" />
 
 /**
- * The end-to-end journey a user takes through the dashboard: load the full
- * dataset, narrow it down from several directions, inspect a transaction and
- * clear back to the start. Everything here runs against the production build.
+ * The journey through the dashboard, against the production build: read the
+ * overall position, drill into transactions, record something by hand, and
+ * work both sides of the ledger.
  */
-/**
- * Asserts that every currently rendered row contains `text`.
- *
- * This has to be a single retryable assertion rather than `.each()` over the
- * result of `cy.get`: the merchant search is debounced, so `cy.get` would
- * happily resolve against the pre-filter rows and then assert on element
- * references React has already replaced.
- */
-function everyRenderedRowShouldContain(text: string): void {
-  cy.get('[data-testid="transaction-row"]')
-    .should('have.length.greaterThan', 0)
-    .and(($rows) => {
-      const offenders = [...$rows].filter((row) => !row.textContent?.includes(text));
-      expect(offenders, `rows not showing "${text}"`).to.have.length(0);
-    });
-}
-
-describe('Spending analytics dashboard', () => {
+describe('Personal finance dashboard', () => {
   beforeEach(() => {
-    cy.visitDashboard();
+    cy.visitApp();
+    cy.clearLocalData();
+    cy.visitApp();
   });
 
-  it('walks the full analysis flow', () => {
-    // ---- 1. The dataset loads and the headline figures are populated ----
-    cy.byTestId('dataset-summary').should('contain', '50,000 transactions');
-    cy.byTestId('result-count').should('contain', '50,000 of 50,000');
-    cy.byTestId('summary-total')
-      .invoke('text')
-      .should('match', /^£[\d,]+\.\d{2}$/);
-    cy.byTestId('summary-count').should('have.text', '50,000');
+  it('opens on the overview with the whole position', () => {
+    cy.byTestId('overview-income').invoke('text').should('match', /^£[\d,]+\.\d{2}$/);
+    cy.byTestId('overview-expense').invoke('text').should('match', /^£[\d,]+\.\d{2}$/);
+    cy.byTestId('overview-net').invoke('text').should('match', /^[+-]?£[\d,]+\.\d{2}$/);
+    cy.byTestId('overview-owed-to-you').should('be.visible');
+    cy.byTestId('overview-you-owe').should('be.visible');
 
-    // ---- 2. Only a window of the 50,000 rows is ever in the DOM ----
-    cy.renderedRowCount().should('be.lessThan', 40);
+    cy.byTestId('top-debtors').should('be.visible');
+    cy.byTestId('top-creditors').should('be.visible');
+  });
 
-    // ---- 3. Scrolling moves the window without growing it ----
+  it('moves between the four sections and keeps the URL in step', () => {
+    cy.byTestId('nav-transactions').click();
+    cy.location('pathname').should('eq', '/transactions');
+    cy.byTestId('transactions-page').should('be.visible');
+
+    cy.byTestId('nav-owed-to-me').click();
+    cy.location('pathname').should('eq', '/owed-to-me');
+    cy.byTestId('ledger-page-receivable').should('be.visible');
+
+    cy.byTestId('nav-i-owe').click();
+    cy.location('pathname').should('eq', '/i-owe');
+    cy.byTestId('ledger-page-payable').should('be.visible');
+
+    cy.byTestId('nav-overview').click();
+    cy.location('pathname').should('eq', '/');
+  });
+
+  it('keeps only a window of rows in the DOM, however far you scroll', () => {
+    cy.byTestId('nav-transactions').click();
+
+    cy.byTestId('transaction-row').should('have.length.lessThan', 40);
     cy.byTestId('transaction-row').first().invoke('attr', 'data-transaction-id').as('firstId');
-    cy.byTestId('transaction-viewport').scrollTo(0, 20_000);
 
+    cy.byTestId('transaction-viewport').scrollTo(0, 20_000);
     cy.get('@firstId').then((firstId) => {
       cy.byTestId('transaction-row')
         .first()
         .invoke('attr', 'data-transaction-id')
         .should('not.equal', firstId);
     });
-    cy.renderedRowCount().should('be.lessThan', 40);
-    cy.byTestId('transaction-viewport').scrollTo(0, 0);
+    cy.byTestId('transaction-row').should('have.length.lessThan', 40);
 
-    // ---- 4. Filtering by category narrows the list and the charts ----
+    cy.byTestId('transaction-viewport').scrollTo('bottom');
+    cy.byTestId('transaction-row').should('have.length.lessThan', 40);
+  });
+
+  it('holds up when the stress dataset is loaded', () => {
+    cy.byTestId('stress-toggle').click();
+    cy.byTestId('dataset-summary', { timeout: 30_000 }).should('contain', '50,000');
+
+    cy.byTestId('nav-transactions').click();
+    cy.byTestId('rendered-count').should('contain', '50,000 rows');
+    cy.byTestId('transaction-row').should('have.length.lessThan', 40);
+  });
+
+  it('records a transaction you type in, and remembers it after a reload', () => {
+    cy.byTestId('nav-transactions').click();
+
+    cy.byTestId('quick-add-counterparty').type('Corner Shop');
+    cy.byTestId('quick-add-amount').type('14.20');
+    cy.byTestId('quick-add-category').select('Groceries');
+    cy.byTestId('quick-add-submit').click();
+
+    // The form clears itself, ready for the next entry.
+    cy.byTestId('quick-add-counterparty').should('have.value', '');
+    cy.byTestId('quick-add-amount').should('have.value', '');
+
+    cy.byTestId('counterparty-search').type('Corner Shop');
+    cy.byTestId('transaction-row').should('have.length', 1).and('contain', '£14.20');
+
+    cy.reload();
+    cy.byTestId('dataset-summary', { timeout: 30_000 }).should('contain', 'transactions');
+    cy.byTestId('counterparty-search').type('Corner Shop');
+    cy.byTestId('transaction-row').should('have.length', 1).and('contain', 'Corner Shop');
+  });
+
+  it('narrows everything from one filter', () => {
+    cy.byTestId('nav-transactions').click();
     cy.byTestId('category-chip-Groceries').click().should('have.attr', 'aria-pressed', 'true');
 
-    cy.byTestId('result-count')
-      .invoke('text')
-      .should('match', /^[\d,]+ of 50,000 transactions match$/);
-    everyRenderedRowShouldContain('Groceries');
-    cy.byTestId('category-bar-chart').find('li').should('have.length', 1);
-
-    // ---- 5. Searching by merchant narrows it further ----
-    cy.byTestId('merchant-search').type('tesco');
-    everyRenderedRowShouldContain('Tesco');
-    cy.byTestId('summary-top-category').should('have.text', 'Groceries');
-
-    // ---- 6. A date preset restricts the range ----
-    cy.byTestId('date-preset-90d').click();
-    cy.byTestId('date-from').should('have.value', '2025-10-02');
-    cy.byTestId('date-to').should('have.value', '2025-12-31');
-
-    // ---- 7. Sorting by amount reorders the list ----
-    cy.byTestId('sort-amount').click().should('have.attr', 'aria-pressed', 'true');
-    cy.byTestId('transaction-row').then(($rows) => {
-      const amounts = [...$rows].map(($row) => {
-        const text = $row.querySelector('[class*="amountCell"]')?.textContent ?? '0';
-        return Number(text.replace(/[£,]/g, ''));
+    cy.byTestId('transaction-row')
+      .should('have.length.greaterThan', 0)
+      .and(($rows) => {
+        const wrong = [...$rows].filter((row) => !row.textContent?.includes('Groceries'));
+        expect(wrong, 'rows outside the chosen category').to.have.length(0);
       });
-      // Descending by default.
-      expect(amounts).to.deep.equal([...amounts].sort((a, b) => b - a));
-    });
 
-    // ---- 8. Selecting a row opens its details ----
-    cy.byTestId('transaction-detail').should('not.exist');
-    cy.byTestId('transaction-row').first().click();
-    cy.byTestId('transaction-detail').should('be.visible').and('contain', 'Tesco');
-    cy.byTestId('close-detail').click();
-    cy.byTestId('transaction-detail').should('not.exist');
-
-    // ---- 9. Resetting restores the whole dataset ----
     cy.byTestId('reset-filters').click();
-    cy.byTestId('merchant-search').should('have.value', '');
     cy.byTestId('category-chip-Groceries').should('have.attr', 'aria-pressed', 'false');
-    cy.byTestId('result-count').should('contain', '50,000 of 50,000');
-    cy.byTestId('summary-count').should('have.text', '50,000');
   });
 
-  it('keeps the rendered row count flat while scrolling deep into the list', () => {
-    cy.renderedRowCount().then((initialCount) => {
-      expect(initialCount).to.be.lessThan(40);
+  it('switches the dashboard between money in and money out', () => {
+    cy.byTestId('nav-transactions').click();
 
-      cy.byTestId('transaction-viewport').scrollTo('bottom');
-      cy.byTestId('transaction-row').should('have.length.lessThan', 40);
+    cy.byTestId('direction-income').click();
+    cy.byTestId('transaction-row')
+      .should('have.length.greaterThan', 0)
+      .and(($rows) => {
+        const wrong = [...$rows].filter((row) => row.dataset.direction !== 'income');
+        expect(wrong, 'outgoing rows while filtered to income').to.have.length(0);
+      });
 
-      // The last row of a 50,000 item list should be reachable.
-      cy.byTestId('transaction-row').last().should('be.visible');
-      cy.get('[class*="footer"]').should('contain', 'of 50,000');
+    cy.byTestId('direction-expense').click();
+    cy.byTestId('transaction-row').and(($rows) => {
+      const wrong = [...$rows].filter((row) => row.dataset.direction !== 'expense');
+      expect(wrong, 'incoming rows while filtered to spending').to.have.length(0);
     });
   });
 
-  it('reports no results rather than an empty screen', () => {
-    cy.byTestId('merchant-search').type('a-merchant-that-does-not-exist');
+  it('records and settles something you are owed', () => {
+    const poundsFrom = (text: string) => Number(text.replace(/[^0-9.]/g, ''));
 
-    cy.byTestId('empty-state').should('be.visible');
-    cy.byTestId('transaction-row').should('not.exist');
-    cy.byTestId('summary-count').should('have.text', '0');
+    cy.byTestId('nav-owed-to-me').click();
+    cy.byTestId('ledger-outstanding')
+      .invoke('text')
+      .then((text) => poundsFrom(text))
+      .as('outstandingBefore');
 
-    cy.contains('button', 'Reset filters').click();
-    cy.byTestId('result-count').should('contain', '50,000 of 50,000');
+    cy.byTestId('toggle-ledger-form').click();
+    cy.byTestId('ledger-counterparty').type('Alex Reid');
+    cy.byTestId('ledger-amount').type('60');
+    cy.byTestId('ledger-reference').type('Concert ticket');
+    cy.byTestId('ledger-submit').click();
+
+    cy.byTestId('ledger-table').should('contain', 'Alex Reid').and('contain', '£60.00');
+
+    // The new debt lifts the outstanding balance by exactly its amount.
+    cy.get<number>('@outstandingBefore').then((before) => {
+      cy.byTestId('ledger-outstanding')
+        .invoke('text')
+        .then((text) => {
+          expect(poundsFrom(text)).to.be.closeTo(before + 60, 0.01);
+        });
+    });
+
+    // Settling it takes it back out again.
+    cy.contains('[data-testid="ledger-row"]', 'Alex Reid').within(() => {
+      cy.byTestId('settle-obligation').click();
+    });
+    cy.contains('[data-testid="ledger-row"]', 'Alex Reid').should('contain', 'Settled');
+
+    cy.get<number>('@outstandingBefore').then((before) => {
+      cy.byTestId('ledger-outstanding')
+        .invoke('text')
+        .then((text) => {
+          expect(poundsFrom(text)).to.be.closeTo(before, 0.01);
+        });
+    });
+  });
+
+  it('shows what you owe, with the overdue ones called out', () => {
+    cy.byTestId('nav-i-owe').click();
+
+    cy.byTestId('ledger-page-payable').should('be.visible');
+    cy.byTestId('ledger-outstanding').invoke('text').should('match', /^£[\d,]+\.\d{2}$/);
+    cy.byTestId('ledger-ageing').should('be.visible');
+    cy.get('[data-testid="ledger-row"]').should('have.length.greaterThan', 0);
   });
 
   it('remembers the chosen theme across a reload', () => {

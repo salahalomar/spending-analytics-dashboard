@@ -1,6 +1,6 @@
 import type { Obligation, ObligationDirection, ObligationKind } from '@/types/ledger';
 import { mulberry32, pickWeighted, randomInt, type Rng } from '@/data/random';
-import { DATASET_END_DATE } from '@/data/generateTransactions';
+import { datasetEndDate } from '@/data/generateTransactions';
 
 const MS_PER_DAY = 86_400_000;
 
@@ -102,7 +102,7 @@ function buildOne(
  * dashboard. Deterministic for a given seed, like the transaction generator.
  */
 export function generateObligations(options: GenerateObligationsOptions = {}): Obligation[] {
-  const { countPerDirection = 9, seed = 8842, today = DATASET_END_DATE } = options;
+  const { countPerDirection = 9, seed = 8842, today = datasetEndDate() } = options;
 
   const rng = mulberry32(seed);
   const todayMs = Math.floor(today.getTime() / MS_PER_DAY) * MS_PER_DAY;
