@@ -14,7 +14,8 @@ describe('README screenshots', () => {
       },
     });
 
-    cy.get('[data-testid="rendered-count"]', { timeout: 30_000 }).should('contain', '50,000 rows');
+    cy.get('[data-testid="overview-page"]', { timeout: 30_000 }).should('be.visible');
+    cy.get('[data-testid="cash-flow-chart"]').should('be.visible');
     // Let the bar widths finish their transition before capturing.
     cy.wait(600);
     cy.screenshot('dashboard-dark', { capture: 'viewport', overwrite: true });
