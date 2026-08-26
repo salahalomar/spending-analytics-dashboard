@@ -106,7 +106,7 @@ Then open http://localhost:5173.
 
 ## Testing
 
-**292 Jest tests at ~96% statement coverage**, with the threshold enforced in
+**353 Jest tests at ~95% statement coverage**, with the threshold enforced in
 [`jest.config.cjs`](jest.config.cjs) so it cannot quietly rot, plus **10 Cypress journeys** against
 the production build.
 

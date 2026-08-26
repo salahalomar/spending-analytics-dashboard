@@ -160,13 +160,17 @@ describe('FilterPanel', () => {
       });
     });
 
-    it('accepts a typed range', async () => {
+    it('accepts a typed range at both ends', async () => {
       const user = userEvent.setup();
       const { store } = renderPanel();
 
       await user.clear(screen.getByTestId('date-from'));
       await user.type(screen.getByTestId('date-from'), '2025-03-01');
       expect(store.getState().filters.dateFrom).toBe('2025-03-01');
+
+      await user.clear(screen.getByTestId('date-to'));
+      await user.type(screen.getByTestId('date-to'), '2025-09-30');
+      expect(store.getState().filters.dateTo).toBe('2025-09-30');
     });
   });
 
@@ -175,7 +179,9 @@ describe('FilterPanel', () => {
     const { store } = renderPanel();
 
     await user.type(screen.getByTestId('min-amount'), '25');
-    expect(store.getState().filters.minAmount).toBe('25');
+    await user.type(screen.getByTestId('max-amount'), '80');
+
+    expect(store.getState().filters).toMatchObject({ minAmount: '25', maxAmount: '80' });
   });
 
   it('reports how much of the dataset is showing', async () => {
